@@ -10,7 +10,8 @@ import matplotlib.pyplot as plt
 
 
 def load_categorized_trans():
-    trans =  pd.read_csv("textfiles/categorized-all-2024-2025.csv")
+#    trans =  pd.read_csv("textfiles/categorized-all-2024-2025.csv")
+    trans = pd.read_csv("https://raw.githubusercontent.com/chrismcnally/spending/refs/heads/master/textfiles/categorized-all-2024-2025.csv")
     trans = trans.loc[trans.newt == "D"] # we currently have D, C, P, and F
     trans['category'] = trans['category'].fillna("Unknown") # mark the unknown category
     trans.sort_values(by=["lance","dv","balance"], ascending=[True, True, False], inplace=True)
@@ -76,7 +77,7 @@ def get_summary():
     else: #user chose a single year to filter by
         qstr = "year == '" + year  + "'"
         summary = summary.query(qstr)
-        output_file(summary,year)
+#        output_file(summary,year)
         return summary.round({'amount': 2, 'usd': 2})
 
 
