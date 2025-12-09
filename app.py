@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 
 def load_categorized_trans():
-    trans =  pd.read_csv("/Users/cmcnally/Dropbox/python/textfiles/categorized-2025.csv")
+    trans =  pd.read_csv("/Users/cmcnally/Dropbox/python/textfiles/categorized-all-2024-2025.csv")
     trans = trans.loc[trans.newt == "D"] # we currently have D, C, P, and F
     trans['category'] = trans['category'].fillna("Unknown") # mark the unknown category
     trans.sort_values(by=["lance","dv","balance"], ascending=[True, True, False], inplace=True)
@@ -43,9 +43,6 @@ with ui.sidebar():
     ui.input_date_range("inDateRange", "Input date", start="2024-11-01", end="2025-11-30")
     ui.input_radio_buttons("months_or_years","Summarize by:",["Year","Month"],selected = ["Month"])
     ui.input_radio_buttons("sort_by","Sort by:",["amount","Date","category"],selected = ["category"])
-#ui.output_data_frame("summary_df")
-#ui.output_data_frame("transactions_df")
-#ui.output_plot("my_scatter")
 
 # looks like I am using shiny express here, refering to input.inDateRange() without specifying a server section
 @reactive.calc
@@ -76,7 +73,7 @@ def get_summary():
             summary = trans.query(qstr)     
             summary = summary.groupby(['category','year'])['amount'].sum().reset_index()   
             return summary.round({'amount': 2, 'usd': 2})
-    else:
+    else: #user chose a single year to filter by
         qstr = "year == '" + year  + "'"
         summary = summary.query(qstr)
         output_file(summary,year)
@@ -124,12 +121,16 @@ def filtered_df():
         # Filter data for selected category and dates
         return get_trans().query(qstr1)
     
-#@render.plot
-#def my_scatter():
-#    summary = trans.groupby(['category','year'])['amount'].sum().reset_index()
-#    qstr = "year == '2025'"
-#    summary = summary.query(qstr)
+@render.plot
+def my_scatter():
+    qstr = "year == '2025'"
+    summary = get_trans().query(qstr)
 #    amounts = summary.amount
 #    negs = [abs(Decimal(x)) for x in amounts]
 #    summary["negs"] = negs
-#    return plt.pie(x = summary.negs, labels = summary.category)
+    summary.amount = summary.amount.apply(lambda negamt : abs(round( Decimal(negamt),2))) # pie positive numbers only
+    summary = summary.groupby(['category','year'])['amount'].sum().reset_index()
+    # reshape the data with pivot table and aggregate the mean this produces one column for every category, ugg
+    #dfp = summary.pivot_table(index='year', columns='category', values='amount', aggfunc='sum')
+    top10 = summary.sort_values(by=["year","amount","category"],ascending=[True,False,True]).iloc[:15]
+    return plt.pie(x = top10.amount, labels = top10.category)

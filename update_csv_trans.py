@@ -107,6 +107,10 @@ def add_categories(transactions, categories):
                 if name_fragment in trans["desc"]:
                     trans["category"] = cat["name"]
                     trans["fragment"] = name_fragment
+                    if "sub-category" in cat:
+                        sub = cat["sub-category"]
+                        if name_fragment in sub:
+                            trans["memo"] = sub[name_fragment]
                     if ("who" in cat):
                         trans["who"] = cat["who"]
                     if (cat["name"]) == amazon:
@@ -141,7 +145,7 @@ def update_category(fragment, category, amount):
         
 
 def load_csv_trans(infile):
-    with open(infile,"r") as csvfile:
+    with open(infile,"r",encoding="utf-8-sig") as csvfile:
         reader = csv.DictReader(csvfile)
         trans = list(reader)
     return trans
@@ -207,29 +211,27 @@ def make_search_structures():
 
 transactions = []
 amount_to_category = {}
-category_list = load_updated_categories(False)  
+category_list = load_updated_categories(True)  
 work = [{"infile" : "/Users/cmcnally/Dropbox/python/textfiles/uncategorized-2025.csv",
          "outfile" : "/Users/cmcnally/Dropbox/python/textfiles/categorized-mil-2025.csv",
-         "do_atm" : True},
+         "do_atm" : True, "writeFile": True},
          {"infile" : "/Users/cmcnally/Dropbox/python/textfiles/uncategorized-chase-2024-2025.csv",
          "outfile" : "/Users/cmcnally/Dropbox/python/textfiles/categorized-chase-2024-2025.csv",
-         "do_atm" : False}]
-        
-# files from Millennium bank  
-#infile = "/Users/cmcnally/Dropbox/python/textfiles/uncategorized-2025.csv"
-#outfile = "/Users/cmcnally/Dropbox/python/textfiles/categorized-2025.csv"
-#do_atm = True
-# files from chase
-#infile = "/Users/cmcnally/Dropbox/python/textfiles/uncategorized-chase-2024-2025.csv"
-#outfile = "/Users/cmcnally/Dropbox/python/textfiles/categorized-chase-2024-2025.csv"
-#do_atm = False
+         "do_atm" : False, "writeFile": True},
+          {"infile" : "/Users/cmcnally/Dropbox/python/textfiles/uncategorized-mil-2024.csv",
+         "outfile" : "/Users/cmcnally/Dropbox/python/textfiles/categorized-mil-2024.csv",
+         "do_atm" : True, "writeFile":True}
+         ]
+all_trans =[]        
 for w in work:
     transactions = load_csv_trans(w["infile"])
     transactions = add_categories(transactions, category_list)
     if w["do_atm"]:
         deal_with_atm(transactions) #this adjusts hellas atms for clara
-    #    update_categories(category_list)
-    write_updated_transactions(transactions,w["outfile"])
-
+    if w["writeFile"]:
+        write_updated_transactions(transactions,w["outfile"])
+    all_trans.extend(transactions)
 update_categories_file(category_list)
 
+#do all of them
+write_updated_transactions(all_trans,"/Users/cmcnally/Dropbox/python/textfiles/categorized-all-2024-2025.csv")

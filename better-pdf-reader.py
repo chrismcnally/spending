@@ -11,6 +11,11 @@ PDF_FILES = ["012024.pdf","022024.pdf",	"032024.pdf",	"042024.pdf",	"052025.pdf"
 OUTPUT_CSV = "/Users/cmcnally/Dropbox/python/textfiles/converted_statements.csv"
 
 
+# ---- with help from ChatGPT, this code OCRs the PDFs from Millennium Bank and creates rows ---#
+# bugs include if description ends in a number, and the amount is 3 digists, xxx.xx, then it grabs
+# the last digit of the description, n and makes it the thousands so amount becomes nxxx.xx
+# there is no way to tell debit from credit so assume Debit and manually fix up
+
 # -------- Utility functions -------- #
 
 def fix_date(d,default_year=2024):

@@ -3,18 +3,37 @@ import pandas as pd
 from decimal import Decimal
 import re
 
-
+PATH_F = "/Users/cmcnally/Dropbox/python/textfiles/"
 # this creates a file to import into YNAB converting all transactions to USD based on the ex rate at the last deposit 
 def readMil(filename):
     # when your UI is in English, and you downloaad a file, it's UTF-8 and Debit, Credit
     # when your UI is Portuguese, you get UTF-16-be and Débito and Crédito with accents
-    pathf = "/Users/cmcnally/Dropbox/python/textfiles/" + filename
+    pathf = PATH_F + filename
     if filename == "AUG-2021-2.csv" or filename == "SEPT-2021-2.csv" or filename == "JULY-2021-2.csv":
         return pd.read_csv(pathf, delimiter=";", engine='python',header=None,
         names=["lance","dv","desc","amount","type","balance"],   parse_dates=['dv','lance'], dayfirst=True) 
     else:
         return pd.read_csv(pathf, delimiter=";", engine='python', skiprows=13, skipfooter=1, encoding="utf_16_le",header=None,
         names=["lance","dv","desc","amount","type","balance"], parse_dates=['dv','lance'], dayfirst=True)
+
+def readPdfExtract(filename):
+    pathf = PATH_F + filename
+    return pd.read_csv(pathf,  engine='python',header=None, skiprows=1,
+        names=["lance","dv","desc","amount","type","balance","junk"],   parse_dates=['dv','lance'], dayfirst=False) 
+
+def initOtherColumns(dataf):
+    dataf["usd"] = Decimal(0)
+    dataf["erate"] = Decimal(0)
+    dataf["memo"] = ""
+    dataf['amount'] = dataf.amount.apply(lambda x :round( Decimal(x),2)) # make amount a decimal instead of float
+    dataf["category"] = ""
+    dataf["subcat"] = ""
+    dataf["fragment"] = ""
+    dataf["newt"] = "D"
+    dataf["who"] = ""
+
+    return dataf
+  
 
 def getUSDForCredit(item = None, defaultRate=Decimal("1.2")):
     euros = item["amount"]
@@ -137,6 +156,16 @@ files = ("Portugues-bank-2024-12.csv",
 "Portugues-bank-2025-07.csv","Portugues-bank-2025-08.csv",
 "Portugues-bank-2025-09.csv","Portugues-bank-2025-10.csv",
 "Portugues-bank-2025-11.csv")
+
+# process 2024 data from PDF scrape
+dataf = readPdfExtract("converted_statements-final-fixed.csv")
+dataf = initOtherColumns(dataf)
+dataf["newt"] = dataf["type"]
+header = ["lance","dv","desc","amount","newt","balance","usd","erate","memo","category","subcat","fragment","who"]
+dataf.to_csv("/Users/cmcnally/Dropbox/python/textfiles/uncategorized-mil-2024.csv", index=False, columns=header)
+
+# 2025 data files code is below
+
 # make a panda dataframe from all the files
 dataf = pd.concat(map(readMil,files),axis = 0, ignore_index=True)
 #balance = Decimal(0.0)
@@ -146,38 +175,15 @@ dataf = pd.concat(map(readMil,files),axis = 0, ignore_index=True)
 dataf = dataf.sort_values(by=['lance', 'balance'], ascending=[True,False])
 #print(dataf.sort_values(by=["lance","dv"]).head(10))
 # add extra columns for the rate and usd
-usds =  [Decimal(0)] * dataf["amount"].count() #make array of count() zeros
-dataf["usd"] = usds
-rates =  [Decimal(0)] * dataf["amount"].count()
-dataf["erate"] = rates
-memos = [""] * dataf["amount"].count() #was conversion rate
-dataf["memo"] = memos
-dataf['amount'] = dataf.amount.apply(lambda x :round( Decimal(x),2)) # make amount a decimal instead of float
-category = [""] * dataf["amount"].count()
-dataf["category"] = category
-subcat = [""] * dataf["amount"].count()
-dataf["subcat"] = subcat
-who = [""] * dataf["amount"].count()
-frags = [""] * dataf["amount"].count()
-dataf["fragment"] = frags
-newt = ["x"] * dataf["amount"].count()
-dataf["newt"] = newt
-
-dataf["who"] = who
+dataf = initOtherColumns(dataf)
 # convert Debito to D (in a new column newt)
 dataf.loc[dataf.type == "Débito",'newt'] = "D"
 dataf.loc[dataf.type == "Crédito",'newt'] = "C"
-#for index, item in dataf.iterrows(): # somehow this does not work, try iterrows()
-#    if (item["type"].startswith("D")):
-#        item["newt"]= "D" 
-#    elif (item["type"].startswith("C")):
-#        item["newt"]= "C" 
-#    else:
-#        item["newt"] = " "
-
 header = ["lance","dv","desc","amount","newt","balance","usd","erate","memo","category","subcat","fragment","who"]
 dataf.to_csv("/Users/cmcnally/Dropbox/python/textfiles/uncategorized-mil-2025.csv", index=False,encoding="ascii", columns=header)
 
+
+#this code that follows was for the old YNAB data
 
 #the following was before we had all months, now we have data from the begingin
 startingBalance = Decimal(38190.71) #sum of all transfers in prior to 10/1/2021=
