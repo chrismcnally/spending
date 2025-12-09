@@ -589,6 +589,7 @@
     "payee_contains": [
       "EVDCR",
       "ETNAGA CONS",
+      "HOTEL JERONIMOS",
       "BALLET",
       "BALLETSHOP",
       "ATHLETEREG",
@@ -774,6 +775,7 @@
       "J.O.M.",
       "BRICOMARCHE",
       "HIPERFAMILIA",
+      "A.M.SHOPPING",
       "VIVA CALDA",
       "MAX MAT",
       "MAXMAT",
@@ -949,10 +951,13 @@
       "AIRBNB  HM4TNBRBXY": "sao miguel",
       "EcoBeach": "slide and splash",
       "TAP AIRLINE 0470010421404": "Bob visit August",
-      "TAP AIR     000001251641": "Bob visit April"
+      "TAP AIR     000001251641": "Bob visit April",
+      "PASARON": "Caceres"
     },
     "payee_contains": [
       "Patricia Sue Danner",
+      "PASARON",
+      "PONTA DELGAGADA",
       "VIKING",
       "EcoBeach",
       "TAP AIR     000001251641",
@@ -1531,6 +1536,9 @@
       "AIRBNB * HMPT4Y5WS3",
       "C POMPIDOU VEL  2359780",
       "FAME            9260563",
+      "Gate Gourmet",
+      "MACDONALDS AEROPORTO",
+      "EASYPAY LISBOA",
       "EASYJET AIR K8JNQZ8"
     ],
     "weight": 60,
