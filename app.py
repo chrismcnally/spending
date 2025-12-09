@@ -42,8 +42,8 @@ ui.h2("All Transactions")
 with ui.sidebar():
     ui.input_selectize("input_year", "Years", choices=("All Years","Date Range","2025","2024","2023"), selected="All Years"),
     ui.input_date_range("inDateRange", "Input date", start="2024-11-01", end="2025-11-30")
-    ui.input_radio_buttons("months_or_years","Summarize by:",["Year","Month"],selected = ["Month"])
-    ui.input_radio_buttons("sort_by","Sort by:",["amount","Date","category"],selected = ["category"])
+    ui.input_radio_buttons("months_or_years","Summarize by:",["Year","Month"],selected = ["Year"])
+    ui.input_radio_buttons("sort_by","Sort by:",["amount","Date","category"],selected = ["amount"])
 
 # looks like I am using shiny express here, refering to input.inDateRange() without specifying a server section
 @reactive.calc
@@ -124,8 +124,16 @@ def filtered_df():
     
 @render.plot
 def my_scatter():
-    qstr = "year == '2025'"
-    summary = get_trans().query(qstr)
+    qstr = ""
+    if input.input_year() in ["All Years","Date Range"]:
+        qstr = ""
+    else:
+        qstr = "year == '" + input.input_year() + "'"
+    if qstr == "":
+        summary = get_trans()
+    else:
+        summary = get_trans().query(qstr)
+
 #    amounts = summary.amount
 #    negs = [abs(Decimal(x)) for x in amounts]
 #    summary["negs"] = negs
