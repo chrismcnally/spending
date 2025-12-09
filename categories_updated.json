@@ -458,7 +458,7 @@
       "DELIRIUM CAFE LIS",
       "BAIXA CHIADO"
     ],
-    "weight": 16,
+    "weight": 17,
     "fragment_weights": {
       "MAREC ESPACO CASA": 2,
       "ROCKY S CAFE": 1,
@@ -471,6 +471,7 @@
       "LUCKY 7 WINE": 1,
       "GUACAMOLE": 2,
       "MULTIMARCA": 1,
+      "CERVEJA NETUS": 1,
       "BRILHANTES": 2
     }
   },
@@ -547,7 +548,7 @@
       "ALTA RESTAURANTE",
       "QUINTA SENHORA DO ARRIO"
     ],
-    "weight": 145,
+    "weight": 146,
     "fragment_weights": {
       "MUSARANHOS": 3,
       "CASA DO BINGRE": 2,
@@ -574,6 +575,7 @@
       "Fogo e Sabor": 1,
       "TASCA": 1,
       "OUTBECO": 2,
+      "LETRARIA": 1,
       "ORIENTE REST BUFFET": 1,
       "LITRO": 1,
       "RAZZLE DAZZLE": 1,
@@ -610,7 +612,7 @@
       "SPDAD - Sociedade Portugu",
       "WWW.REALIQ.ONLINE"
     ],
-    "weight": 64,
+    "weight": 65,
     "fragment_weights": {
       "EVDCR": 12,
       "ETNAGA CONS": 1,
@@ -630,7 +632,8 @@
       "WWW.REALIQ.ONLINE": 1,
       "DONORSCHOOSE": 1,
       "CHUFFED.OR": 1,
-      "RUNKD.IT 0-55EC-4EF1-803D": 1
+      "RUNKD.IT 0-55EC-4EF1-803D": 1,
+      "HOTEL JERONIMOS": 1
     }
   },
   {
@@ -729,6 +732,7 @@
     "payee_contains": [
       "MB WAY P/ *****5954",
       "MB WAY P/ *****9181",
+      "MB WAY P/ *****3313",
       "xxxCOMISSAO TRF MBWAY 175.00",
       "xxxCOMISSAO TRF MBWAY 150.00",
       "xxxCOMISSAO TRF MBWAY 180.00",
@@ -747,10 +751,11 @@
       "INATURALIST",
       "ECOGROWING"
     ],
-    "weight": 63,
+    "weight": 73,
     "fragment_weights": {
       "CLUB PADEL": 8,
       "MB WAY P/ *****9181": 21,
+      "MB WAY P/ *****3313": 10,
       "MB WAY P/ *****5954": 1,
       "NUNO MIGU": 16,
       "CRONOMETER": 1,
@@ -801,7 +806,7 @@
       "FORUM CHINA",
       "MB WAY P/ *****2455"
     ],
-    "weight": 59,
+    "weight": 60,
     "fragment_weights": {
       "HIPER ": 22,
       "LIU YUANYUAN": 7,
@@ -816,6 +821,7 @@
       "MAXMAT": 1,
       "IKEA": 1,
       "WORTEN": 2,
+      "A.M.SHOPPING": 1,
       "AGRILOJA": 3,
       "HIPERFAMILA": 1,
       "JOM - CALDAS RAINHA": 1
@@ -923,7 +929,7 @@
       "BOWLING",
       "OBIDOS VILA NATAL"
     ],
-    "weight": 42,
+    "weight": 43,
     "fragment_weights": {
       "VILA NATAL": 4,
       "FOTOSOUVENIR AMARANTFAF": 2,
@@ -938,7 +944,8 @@
       "ROBLOX.COM": 12,
       "TURTLEBACK": 1,
       "BERLENGATUR": 1,
-      "OCEANARIO": 1
+      "OCEANARIO": 1,
+      "GELATOMANIA": 1
     }
   },
   {
@@ -991,7 +998,7 @@
       "TAP AIRLINE 0474207049847",
       "ET CAR HIRE"
     ],
-    "weight": 53,
+    "weight": 55,
     "fragment_weights": {
       "ESTREMOZ": 2,
       "SEVILLA": 8,
@@ -1022,6 +1029,8 @@
       "EXPPINTOR": 2,
       "ZERISCOFFEE": 1,
       "PARKING OBISPO GALARZA": 2,
+      "PASARON": 1,
+      "PONTA DELGAGADA": 1,
       "SALAMANCA": 4,
       "SANTAGLORIA": 2
     }
@@ -1049,7 +1058,7 @@
       "AQUI HA GATO",
       "TEACHERSPAYTEACHERS.COM"
     ],
-    "weight": 56,
+    "weight": 57,
     "fragment_weights": {
       "NOTE ": 6,
       "PORTO EDITORA": 3,
@@ -1061,6 +1070,7 @@
       "TEACHERSPAYTEACHERS.COM": 2,
       "LIVRARIA": 2,
       "AQUI HA GATO": 1,
+      "LIDEL LISBOA": 1,
       "PUBLIC AERODROMIO": 1
     },
     "sub-category": {
@@ -1345,7 +1355,7 @@
     "group_id": "850bc6c5-c687-47a1-98a2-2d658d65xx0e38",
     "group_name": "Second Tier Expenses: Luxuries and Lifestyle",
     "sub-category": {
-      "MB WAY P/ *****3133": "Marg Cunha"
+      "MB WAY P/ *****3313": "Marg Cunha"
     },
     "payee_contains": [
       "TRF MB WAY P/ *****4952",
@@ -1363,10 +1373,10 @@
       "CHILOREN S WORLD",
       "SANAPSY",
       "MARGARIDA CUNHA",
-      "MB WAY P/ *****3133",
+      "MB WAY P/ *****3313",
       "PIMPOES"
     ],
-    "weight": 128,
+    "weight": 119,
     "fragment_weights": {
       "RESPOSTAS INVISIVEIS": 21,
       "CHILDREN S": 38,
@@ -1378,7 +1388,6 @@
       "SANAPSY": 5,
       "Respostas Invisiveis": 1,
       "QUINTAS": 1,
-      "MB WAY P/ *****3133": 9,
       "CHILOREN S WORLD": 2
     }
   },
@@ -1541,7 +1550,7 @@
       "EASYPAY LISBOA",
       "EASYJET AIR K8JNQZ8"
     ],
-    "weight": 60,
+    "weight": 64,
     "fragment_weights": {
       "LEVALLOIS-PERRET": 9,
       "Vasiliki Flora": 4,
@@ -1570,6 +1579,9 @@
       "SWEETIES": 1,
       "BOLT.EUO2508282154": 1,
       "VIVLIOPOLIO": 2,
+      "EASYPAY LISBOA": 1,
+      "MACDONALDS AEROPORTO": 2,
+      "Gate Gourmet": 1,
       "TURTLECHAPTER": 4,
       "KOSTARELOU": 1,
       "KALLITHEA GR": 1,
