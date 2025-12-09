@@ -1,9 +1,7 @@
 from decimal import Decimal,ROUND_HALF_UP
 from shiny import reactive
 import json
-from shiny.express import input
-from shiny.express import render, ui
-from shiny import App, reactive
+from shiny.express import input, render, ui
 import csv
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -44,6 +42,7 @@ with ui.sidebar():
     ui.input_date_range("inDateRange", "Input date", start="2024-11-01", end="2025-11-30")
     ui.input_radio_buttons("months_or_years","Summarize by:",["Year","Month"],selected = ["Year"])
     ui.input_radio_buttons("sort_by","Sort by:",["amount","Date","category"],selected = ["amount"])
+
 
 # looks like I am using shiny express here, refering to input.inDateRange() without specifying a server section
 @reactive.calc
@@ -92,15 +91,32 @@ def get_trans():
    # return trans.query(qstr).round({'amount': 2, 'usd': 2})
      return trans.round({'amount': 2, 'usd': 2})
 
+with ui.layout_columns(col_widths=[5,7]):
 
-@render.data_frame
-def summary_df():
-    #round(2) would work better if the column was already a decimal. 
-    return render.DataGrid(get_summary(), filters=True, selection_mode="rows")
+    @render.data_frame
+    def summary_df():
+        #round(2) would work better if the column was already a decimal. 
+        return render.DataGrid(get_summary(), filters=True, selection_mode="rows")
+    @render.plot
+    def my_scatter():
+        qstr = ""
+        if input.input_year() in ["All Years","Date Range"]:
+            qstr = ""
+        else:
+            qstr = "year == '" + input.input_year() + "'"
+        if qstr == "":
+            summary = get_trans()
+        else:
+            summary = get_trans().query(qstr)
+        summary.amount = summary.amount.apply(lambda negamt : abs(round( Decimal(negamt),2))) # pie positive numbers only
+        summary = summary.groupby(['category','year'])['amount'].sum().reset_index()
+        top10 = summary.sort_values(by=["year","amount","category"],ascending=[True,False,True]).iloc[:15]
+        return plt.pie(x = top10.amount, labels = top10.category)
 
-@render.data_frame
-def transactions_df():
-    return render.DataGrid(filtered_df(), filters=True)  
+with ui.layout_columns():
+    @render.data_frame
+    def transactions_df():
+        return render.DataGrid(filtered_df(), filters=True)  
 
 @reactive.calc
 def filtered_df():
@@ -122,24 +138,3 @@ def filtered_df():
         # Filter data for selected category and dates
         return get_trans().query(qstr1)
     
-@render.plot
-def my_scatter():
-    qstr = ""
-    if input.input_year() in ["All Years","Date Range"]:
-        qstr = ""
-    else:
-        qstr = "year == '" + input.input_year() + "'"
-    if qstr == "":
-        summary = get_trans()
-    else:
-        summary = get_trans().query(qstr)
-
-#    amounts = summary.amount
-#    negs = [abs(Decimal(x)) for x in amounts]
-#    summary["negs"] = negs
-    summary.amount = summary.amount.apply(lambda negamt : abs(round( Decimal(negamt),2))) # pie positive numbers only
-    summary = summary.groupby(['category','year'])['amount'].sum().reset_index()
-    # reshape the data with pivot table and aggregate the mean this produces one column for every category, ugg
-    #dfp = summary.pivot_table(index='year', columns='category', values='amount', aggfunc='sum')
-    top10 = summary.sort_values(by=["year","amount","category"],ascending=[True,False,True]).iloc[:15]
-    return plt.pie(x = top10.amount, labels = top10.category)
