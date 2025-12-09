@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 
 def load_categorized_trans():
-    trans =  pd.read_csv("/Users/cmcnally/Dropbox/python/textfiles/categorized-all-2024-2025.csv")
+    trans =  pd.read_csv("textfiles/categorized-all-2024-2025.csv")
     trans = trans.loc[trans.newt == "D"] # we currently have D, C, P, and F
     trans['category'] = trans['category'].fillna("Unknown") # mark the unknown category
     trans.sort_values(by=["lance","dv","balance"], ascending=[True, True, False], inplace=True)
@@ -80,8 +80,8 @@ def get_summary():
         return summary.round({'amount': 2, 'usd': 2})
 
 
-def output_file(sumt,year):
-     sumt.to_csv("/Users/cmcnally/Dropbox/python/textfiles/sorted" + year + ".csv", index=False)
+#def output_file(sumt,year):
+   #  sumt.to_csv("/Users/cmcnally/Dropbox/python/textfiles/sorted" + year + ".csv", index=False)
 
 
 @reactive.calc
