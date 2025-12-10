@@ -4,6 +4,12 @@ from decimal import Decimal
 import re
 
 PATH_F = "/Users/cmcnally/Dropbox/python/textfiles/"
+# this needs to be fixed, it contains code to read the millennium CSV files, and the result of the PDF extraction
+# but it has a lot of old code in it that did YNAB work that we don't need. The mainline has 3 sections and only
+# 1 is generic for the CSVs, the second part is specific to the PDFs and the third is total ynab not needed. so run in the#
+# debugger and stop after the work you need is done. Eventually clean this out and get rid of all the YNAB, and comment out
+# the PDF stuff hopefully you won't need it anymore.
+
 # this creates a file to import into YNAB converting all transactions to USD based on the ex rate at the last deposit 
 def readMil(filename):
     # when your UI is in English, and you downloaad a file, it's UTF-8 and Debit, Credit
@@ -34,7 +40,12 @@ def initOtherColumns(dataf):
 
     return dataf
   
-
+def fix_credits(dataf):
+    # transfers are not credits in our final analysis, we need to change them to P for payments, or T for transfer, but
+    # we used P in chase so P is fine
+    dataf.loc[dataf["desc"].str.contains("transferwise", case=False, na=False),"newt",] = "P"
+    dataf.loc[dataf["desc"].str.contains("EMILY HELLA TSACONAS", case=True, na=False),"newt",] = "P"
+    # this one too "Wise" and "Ord.Pgt.do Estrg"
 def getUSDForCredit(item = None, defaultRate=Decimal("1.2")):
     euros = item["amount"]
     #print(item)
@@ -161,8 +172,10 @@ files = ("Portugues-bank-2024-12.csv",
 dataf = readPdfExtract("converted_statements-final-fixed.csv")
 dataf = initOtherColumns(dataf)
 dataf["newt"] = dataf["type"]
+dataf = fix_credits(dataf)
 header = ["lance","dv","desc","amount","newt","balance","usd","erate","memo","category","subcat","fragment","who"]
-dataf.to_csv("/Users/cmcnally/Dropbox/python/textfiles/uncategorized-mil-2024.csv", index=False, columns=header)
+# this is putting the dates in mm-dd-yy format, not ok, need yyyy-mm-dd untested change
+dataf.to_csv("/Users/cmcnally/Dropbox/python/textfiles/uncategorized-mil-2024.csv", index=False, columns=header,date_format='%Y%m%d')
 
 # 2025 data files code is below
 
@@ -180,7 +193,7 @@ dataf = initOtherColumns(dataf)
 dataf.loc[dataf.type == "Débito",'newt'] = "D"
 dataf.loc[dataf.type == "Crédito",'newt'] = "C"
 header = ["lance","dv","desc","amount","newt","balance","usd","erate","memo","category","subcat","fragment","who"]
-dataf.to_csv("/Users/cmcnally/Dropbox/python/textfiles/uncategorized-mil-2025.csv", index=False,encoding="ascii", columns=header)
+dataf.to_csv("/Users/cmcnally/Dropbox/python/textfiles/uncategorized-mil-2025.csv", index=False,encoding="ascii", columns=header,date_format='%Y%m%d')
 
 
 #this code that follows was for the old YNAB data

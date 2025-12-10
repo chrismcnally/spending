@@ -213,20 +213,42 @@ def make_search_structures():
 transactions = []
 amount_to_category = {}
 category_list = load_updated_categories(True)  
-work = [{"infile" : "/Users/cmcnally/Dropbox/python/textfiles/uncategorized-2025.csv",
-         "outfile" : "/Users/cmcnally/Dropbox/python/textfiles/categorized-mil-2025.csv",
-         "do_atm" : True, "writeFile": True},
-         {"infile" : "/Users/cmcnally/Dropbox/python/textfiles/uncategorized-chase-2024-2025.csv",
-         "outfile" : "/Users/cmcnally/Dropbox/python/textfiles/categorized-chase-2024-2025.csv",
-         "do_atm" : False, "writeFile": True},
-          {"infile" : "/Users/cmcnally/Dropbox/python/textfiles/uncategorized-mil-2024.csv",
-         "outfile" : "/Users/cmcnally/Dropbox/python/textfiles/categorized-mil-2024.csv",
-         "do_atm" : True, "writeFile":True}
-         ]
+# where is the amazon?
+work = [
+  {
+    "infile": "/Users/cmcnally/Dropbox/python/textfiles/uncategorized-mil-2025-fixed.csv",
+    "outfile": "/Users/cmcnally/Dropbox/python/textfiles/categorized-mil-2025.csv",
+    "do_atm": True,
+    "do_cats": True,
+    "writeFile": True
+  },
+  {
+    "infile": "/Users/cmcnally/Dropbox/python/textfiles/uncategorized-mil-2024-fixed.csv",
+    "outfile": "/Users/cmcnally/Dropbox/python/textfiles/categorized-mil-2024.csv",
+    "do_atm": True,
+    "do_cats": True,
+    "writeFile": True
+  },
+  {
+    "infile": "/Users/cmcnally/Dropbox/python/textfiles/uncategorized-chase-2024-2025.csv",
+    "outfile": "/Users/cmcnally/Dropbox/python/textfiles/categorized-chase-2024-2025.csv",
+    "do_atm": False,
+    "do_cats": True,
+    "writeFile": True
+  },
+  {
+    "infile": "/Users/cmcnally/Dropbox/python/textfiles/categorized-amazon-2024-2025-date-fixed.csv",
+    "outfile": "/Users/cmcnally/Dropbox/python/textfiles/alread-done.csv",
+    "do_cats": False,
+    "do_atm": False,
+    "writeFile": False
+  }
+]
 all_trans =[]        
 for w in work:
     transactions = load_csv_trans(w["infile"])
-    transactions = add_categories(transactions, category_list)
+    if w["do_cats"]:
+        transactions = add_categories(transactions, category_list)
     if w["do_atm"]:
         deal_with_atm(transactions) #this adjusts hellas atms for clara
     if w["writeFile"]:

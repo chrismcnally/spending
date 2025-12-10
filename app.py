@@ -4,13 +4,14 @@ import json
 from shiny.express import input, render, ui
 import csv
 import pandas as pd
+from faicons import icon_svg as icon
 import matplotlib.pyplot as plt
 
 
 def load_categorized_trans():
 #    trans =  pd.read_csv("textfiles/categorized-all-2024-2025.csv")
     trans = pd.read_csv("https://raw.githubusercontent.com/chrismcnally/spending/refs/heads/master/textfiles/categorized-all-2024-2025.csv")
-    trans = trans.loc[trans.newt == "D"] # we currently have D, C, P, and F
+    trans = trans.loc[trans["newt"].isin(["D", "C"])] # we currently have D, C, P, and F
     trans['category'] = trans['category'].fillna("Unknown") # mark the unknown category
     trans.sort_values(by=["lance","dv","balance"], ascending=[True, True, False], inplace=True)
     trans.drop(columns=["balance","dv","erate","fragment","who"], inplace=True)
@@ -35,7 +36,6 @@ def make_summary_table(trans):
 
 trans = load_categorized_trans()
 summary = make_summary_table(trans)
-ui.h2("All Transactions")
 with ui.sidebar():
     ui.input_selectize("input_year", "Years", choices=("All Years","Date Range","2025","2024","2023"), selected="All Years")
 #    ui.input_date_range("inDateRange", "Input date", start="2024-11-01", end="2025-11-30")
@@ -43,7 +43,67 @@ with ui.sidebar():
     ui.input_radio_buttons("sort_by","Sort by:",["amount","Date","category"],selected = ["amount"])
 
 
-# looks like I am using shiny express here, refering to input.inDateRange() without specifying a server section
+with ui.layout_columns(col_widths=[5,7]):
+
+    @render.data_frame
+    def summary_df():
+        #round(2) would work better if the column was already a decimal. 
+        return render.DataGrid(get_summary(), filters=True, selection_mode="rows")
+    @render.plot
+    def my_scatter():
+        top10 = pie_data()
+        return plt.pie(x = top10.amount, labels = top10.category)
+
+with ui.value_box(showcase=icon("piggy-bank")):
+    "Total Euros"
+    @render.ui
+    def show_total():
+        return '{:20,.2f}'.format(get_summary()["amount"].sum())
+
+
+with ui.layout_columns():
+    @render.data_frame
+    def transactions_df():
+        return render.DataGrid(filtered_df(), filters=True)  
+    
+
+@reactive.calc
+def filtered_df():
+    # When a summary rows is selected use it as a filter, otherwise, render the detail rows normally 
+    data_selected = summary_df.data_view(selected=True)
+    if ( data_selected.empty):
+        return get_trans()
+    else:
+        category = data_selected["category"].to_numpy()[0]
+        category = category.replace("'","\\'",1)
+        by = input.months_or_years()
+        qstr1 = ""
+        if (by == "Month"): 
+            year_month = data_selected["year_month"].to_numpy()[0]
+            qstr1 = f"category ==  '{category}' and year_month == '{year_month}'"
+        else:
+            year_month = data_selected["year"].to_numpy()[0]
+            qstr1 = f"category ==  '{category}' and year == '{year_month}'"
+        # Filter data for selected category and dates
+        return get_trans().query(qstr1)
+    
+@reactive.calc
+def pie_data():
+    qstr = ""
+    if input.input_year() in ["All Years","Date Range"]:
+        qstr = ""
+    else:
+        qstr = "year == '" + input.input_year() + "'"
+    if qstr == "":
+        summary = get_trans()
+    else:
+        summary = get_trans().query(qstr)
+    summary.amount = summary.amount.apply(lambda negamt : abs(round( Decimal(negamt),2))) # pie positive numbers only
+    summary = summary.groupby(['category','year'])['amount'].sum().reset_index()
+    top10 = summary.sort_values(by=["year","amount","category"],ascending=[True,False,True]).iloc[:15]
+    return top10
+
+
 @reactive.calc
 def get_summary():
 #    dates = input.inDateRange()
@@ -67,10 +127,10 @@ def get_summary():
         summary = summary.query(qstr)
 #        output_file(summary,year)
         return summary.round({'amount': 2, 'usd': 2})
-
-
+    
 #def output_file(sumt,year):
    #  sumt.to_csv("/Users/cmcnally/Dropbox/python/textfiles/sorted" + year + ".csv", index=False)
+
 
 
 @reactive.calc
@@ -79,51 +139,3 @@ def get_trans():
    # qstr = "lance >= '" + dates[0].isoformat() + "' and lance <= '" + dates[1].isoformat() + "'"
    # return trans.query(qstr).round({'amount': 2, 'usd': 2})
      return trans.round({'amount': 2, 'usd': 2})
-
-with ui.layout_columns(col_widths=[5,7]):
-
-    @render.data_frame
-    def summary_df():
-        #round(2) would work better if the column was already a decimal. 
-        return render.DataGrid(get_summary(), filters=True, selection_mode="rows")
-    @render.plot
-    def my_scatter():
-        qstr = ""
-        if input.input_year() in ["All Years","Date Range"]:
-            qstr = ""
-        else:
-            qstr = "year == '" + input.input_year() + "'"
-        if qstr == "":
-            summary = get_trans()
-        else:
-            summary = get_trans().query(qstr)
-        summary.amount = summary.amount.apply(lambda negamt : abs(round( Decimal(negamt),2))) # pie positive numbers only
-        summary = summary.groupby(['category','year'])['amount'].sum().reset_index()
-        top10 = summary.sort_values(by=["year","amount","category"],ascending=[True,False,True]).iloc[:15]
-        return plt.pie(x = top10.amount, labels = top10.category)
-
-with ui.layout_columns():
-    @render.data_frame
-    def transactions_df():
-        return render.DataGrid(filtered_df(), filters=True)  
-
-@reactive.calc
-def filtered_df():
-    # When a summary rows is selected use it as a filter, otherwise, render the detail rows normally 
-    data_selected = summary_df.data_view(selected=True)
-    if ( data_selected.empty):
-        return get_trans()
-    else:
-        category = data_selected["category"].to_numpy()[0]
-        category = category.replace("'","\\'",1)
-        by = input.months_or_years()
-        qstr1 = ""
-        if (by == "Month"): 
-            year_month = data_selected["year_month"].to_numpy()[0]
-            qstr1 = f"category ==  '{category}' and year_month == '{year_month}'"
-        else:
-            year_month = data_selected["year"].to_numpy()[0]
-            qstr1 = f"category ==  '{category}' and year == '{year_month}'"
-        # Filter data for selected category and dates
-        return get_trans().query(qstr1)
-    
