@@ -111,6 +111,7 @@ def add_categories(transactions, categories):
                         sub = cat["sub-category"]
                         if name_fragment in sub:
                             trans["memo"] = sub[name_fragment]
+                            trans["subcat"] = sub[name_fragment]
                     if ("who" in cat):
                         trans["who"] = cat["who"]
                     if (cat["name"]) == amazon:

@@ -13,14 +13,13 @@ def load_categorized_trans():
     trans = trans.loc[trans.newt == "D"] # we currently have D, C, P, and F
     trans['category'] = trans['category'].fillna("Unknown") # mark the unknown category
     trans.sort_values(by=["lance","dv","balance"], ascending=[True, True, False], inplace=True)
-    trans.drop(columns=["balance","erate","fragment","who"], inplace=True)
+    trans.drop(columns=["balance","dv","erate","fragment","who"], inplace=True)
     all_dates = trans["lance"] #gather all dates. this is a list of the values in that column
     year_months = [x[0:4] + x[5:7] for x in all_dates]  
     years =  [x[0:4]  for x in all_dates]
-    testdates = [x[0:4] + "-" +  x[5:7] + "-01" for x in all_dates]  
+#    testdates = [x[0:4] + "-" +  x[5:7] + "-01" for x in all_dates]  
     trans["year"] = years
     trans["year_month"] = year_months
-    trans["testdate"] = testdates
     trans['amount'] = trans['amount'].apply(lambda x: Decimal(x).quantize(Decimal("0.01"),rounding=ROUND_HALF_UP) )
 
    # trans['amount'] = trans['amount'].astype(float)
@@ -30,7 +29,7 @@ def load_categorized_trans():
 
 def make_summary_table(trans):
 #    return trans.groupby([pd.Grouper(key='Category', freq='ME')])['amount'].sum()
-    summary = trans.groupby(['category','year', 'year_month','testdate'])['amount'].sum()
+    summary = trans.groupby(['category','year', 'year_month'])['amount'].sum()
     return summary.reset_index()
 
 
@@ -38,8 +37,8 @@ trans = load_categorized_trans()
 summary = make_summary_table(trans)
 ui.h2("All Transactions")
 with ui.sidebar():
-    ui.input_selectize("input_year", "Years", choices=("All Years","Date Range","2025","2024","2023"), selected="All Years"),
-    ui.input_date_range("inDateRange", "Input date", start="2024-11-01", end="2025-11-30")
+    ui.input_selectize("input_year", "Years", choices=("All Years","Date Range","2025","2024","2023"), selected="All Years")
+#    ui.input_date_range("inDateRange", "Input date", start="2024-11-01", end="2025-11-30")
     ui.input_radio_buttons("months_or_years","Summarize by:",["Year","Month"],selected = ["Year"])
     ui.input_radio_buttons("sort_by","Sort by:",["amount","Date","category"],selected = ["amount"])
 
@@ -47,7 +46,7 @@ with ui.sidebar():
 # looks like I am using shiny express here, refering to input.inDateRange() without specifying a server section
 @reactive.calc
 def get_summary():
-    dates = input.inDateRange()
+#    dates = input.inDateRange()
     year = input.input_year()
     sum_by = input.months_or_years()
     sort = input.sort_by()
@@ -55,7 +54,7 @@ def get_summary():
     if (sum_by == "Month"):
         if (sort =="Date"):
             sort = "year_month"
-        summary = trans.groupby(['category','year', 'year_month','testdate'])['amount'].sum().reset_index()
+        summary = trans.groupby(['category','year', 'year_month'])['amount'].sum().reset_index()
     else:   
         if (sort =="Date"):
             sort = "year"
@@ -63,16 +62,6 @@ def get_summary():
     summary = summary.sort_values(by=[sort,"category"],ascending=asc)
     if (year == "All Years"):
         return summary.round({'amount': 2, 'usd': 2})
-    elif (year == "Date Range"):
-        if (sum_by == "Month"):
-            qstr = "testdate >= '" + dates[0].isoformat() + "' and testdate <= '" + dates[1].isoformat() + "'"
-            summary = summary.query(qstr)
-            return summary.round({'amount': 2, 'usd': 2})
-        else:
-            qstr = "testdate >= '" + dates[0].isoformat() + "' and testdate <= '" + dates[1].isoformat() + "'"
-            summary = trans.query(qstr)     
-            summary = summary.groupby(['category','year'])['amount'].sum().reset_index()   
-            return summary.round({'amount': 2, 'usd': 2})
     else: #user chose a single year to filter by
         qstr = "year == '" + year  + "'"
         summary = summary.query(qstr)
