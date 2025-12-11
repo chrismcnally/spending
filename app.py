@@ -9,8 +9,8 @@ import matplotlib.pyplot as plt
 
 
 def load_categorized_trans():
-#    trans =  pd.read_csv("textfiles/categorized-all-2024-2025.csv")
-    trans = pd.read_csv("https://raw.githubusercontent.com/chrismcnally/spending/refs/heads/master/textfiles/categorized-all-2024-2025.csv")
+    trans =  pd.read_csv("textfiles/categorized-all-2024-2025.csv")
+#    trans = pd.read_csv("https://raw.githubusercontent.com/chrismcnally/spending/refs/heads/master/textfiles/categorized-all-2024-2025.csv")
     trans = trans.loc[trans["newt"].isin(["D", "C"])] # we currently have D, C, P, and F
     trans['category'] = trans['category'].fillna("Unknown") # mark the unknown category
     trans.sort_values(by=["lance","dv","balance"], ascending=[True, True, False], inplace=True)
@@ -72,7 +72,11 @@ def filtered_df():
     # When a summary rows is selected use it as a filter, otherwise, render the detail rows normally 
     data_selected = summary_df.data_view(selected=True)
     if ( data_selected.empty):
-        return get_trans()
+        trans = get_trans()
+        sort = input.sort_by()
+        if (sort == "Date"):
+            sort = "lance"
+        return  trans.sort_values(by=[sort,'lance','category'])   
     else:
         category = data_selected["category"].to_numpy()[0]
         category = category.replace("'","\\'",1)
