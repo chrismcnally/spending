@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 
 def load_categorized_trans():
-#    trans =  pd.read_csv("textfiles/categorized-all-2024-2025.csv")
+    #trans =  pd.read_csv("textfiles/categorized-all-2024-2025.csv")
     trans = pd.read_csv("https://raw.githubusercontent.com/chrismcnally/spending/refs/heads/master/textfiles/categorized-all-2024-2025.csv")
     trans = trans.loc[trans["newt"].isin(["D", "C"])] # we currently have D, C, P, and F
     trans['category'] = trans['category'].fillna("Unknown") # mark the unknown category
@@ -42,6 +42,12 @@ with ui.sidebar():
     ui.input_radio_buttons("months_or_years","Summarize by:",["Year","Month"],selected = ["Year"])
     ui.input_radio_buttons("sort_by","Sort by:",["amount","Date","category"],selected = ["amount"])
 
+with ui.value_box(showcase=icon("piggy-bank")):
+    "Total Euros"
+    @render.ui
+    def show_total():
+        return '{:20,.2f}'.format(get_summary()["amount"].sum())
+
 
 with ui.layout_columns(col_widths=[5,7]):
 
@@ -53,12 +59,6 @@ with ui.layout_columns(col_widths=[5,7]):
     def my_scatter():
         top10 = pie_data()
         return plt.pie(x = top10.amount, labels = top10.category)
-
-with ui.value_box(showcase=icon("piggy-bank")):
-    "Total Euros"
-    @render.ui
-    def show_total():
-        return '{:20,.2f}'.format(get_summary()["amount"].sum())
 
 
 with ui.layout_columns():
@@ -93,19 +93,44 @@ def filtered_df():
     
 @reactive.calc
 def pie_data():
-    qstr = ""
-    if input.input_year() in ["All Years","Date Range"]:
+    data_selected = summary_df.data_view(selected=True)
+    if ( data_selected.empty):
         qstr = ""
+        if input.input_year() in ["All Years","Date Range"]:
+            qstr = ""
+        else:
+            qstr = "year == '" + input.input_year() + "'"
+        if qstr == "":
+            summary = get_trans().copy()
+        else:
+            summary = get_trans().query(qstr).copy()
+        summary.amount = summary.amount.apply(lambda negamt : abs(round( Decimal(negamt),2))) # pie positive numbers only
+        summary = summary.groupby(['category','year'])['amount'].sum().reset_index()
+        top10 = summary.sort_values(by=["year","amount","category"],ascending=[True,False,True]).iloc[:15]
+        return top10
     else:
-        qstr = "year == '" + input.input_year() + "'"
-    if qstr == "":
-        summary = get_trans()
-    else:
-        summary = get_trans().query(qstr)
-    summary.amount = summary.amount.apply(lambda negamt : abs(round( Decimal(negamt),2))) # pie positive numbers only
-    summary = summary.groupby(['category','year'])['amount'].sum().reset_index()
-    top10 = summary.sort_values(by=["year","amount","category"],ascending=[True,False,True]).iloc[:15]
-    return top10
+        category = data_selected["category"].to_numpy()[0]
+        category = category.replace("'","\\'",1)
+        by = input.months_or_years()
+        qstr1 = ""
+        if (by == "Month"): 
+            year_month = data_selected["year_month"].to_numpy()[0]
+            qstr1 = f"category ==  '{category}' and year_month == '{year_month}'"
+        else:
+            year_month = data_selected["year"].to_numpy()[0]
+            qstr1 = f"category ==  '{category}' and year == '{year_month}'"
+        # Filter data for selected category and dates
+        data = get_trans().query(qstr1).copy()
+        data.amount = data.amount.apply(lambda negamt : abs(round( Decimal(negamt),2))) # pie positive numbers only
+        #populate empty subcats with desc
+        #data.loc[data["subcat"].isin(["",None])] = trans["desc"]
+        #mask = data["subcat"].astype(str).str.strip() == ""
+        #trans.loc[mask, "subcat"] = trans.loc[mask, "desc"]
+        data['subcat'] = data.subcat.combine_first(data.desc)
+#        data['subcat'] = data.apply(lambda x: x["desc"] if x['subcat'] == "" else  x["subcat"], axis=1)
+        data = data.groupby('subcat')['amount'].sum().reset_index()
+        data = data.rename(columns={'subcat': 'category'})
+        return data
 
 
 @reactive.calc

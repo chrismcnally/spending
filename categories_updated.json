@@ -88,7 +88,7 @@
       "COMISSAO TRF MBWAY",
       "SUBSTITUICAO DE CARTAO"
     ],
-    "weight": 222,
+    "weight": 225,
     "fragment_weights": {
       "PROGRAMA PRESTIGE": 22,
       "IMPOSTO SELO": 24,
@@ -96,6 +96,7 @@
       "IMPOSTO DO SELO": 39,
       "CORREIOS": 4,
       "NOTARIAL": 1,
+      "DISPONIBILIZACAO": 3,
       "ALINE DIAS SOUZA MENDES": 1,
       "SUBSTITUICAO DE CARTAO": 1,
       "COMISSAO TRE MBWAY": 3,
@@ -147,7 +148,15 @@
       "CIDENTAL AUTOMVEL": "Insurance",
       "FIDELIDADE": "Insurance",
       "OCID SEGUROS DEVOL": "Insurance",
-      "DD OCIDENTAL AUTOMVEL": "Insurance"
+      "DD OCIDENTAL AUTOMVEL": "Insurance",
+      "REPSOL": "Gas",
+      "PETROALVES": "Gas",
+      "SERVICO BP": "Gas",
+      "BP CALDAS": "Gas",
+      "POSTO BP": "Gas",
+      "EST SERVICO": "Gas",
+      "SERVICO CEPSA": "Gas",
+      "EST SERVICO PRIO": "Gas"
     },
     "payee_contains": [
       "Bonita trimeloni",
@@ -385,6 +394,21 @@
     "name": "Groceries",
     "group_id": "bfda1c5b-adcf-487a-80ba-68ee50006317",
     "group_name": "Food & Drink",
+    "sub-category": {
+      "LIDL AGRADECE": "LIDL",
+      "LIOL AGRADECE": "LIDL",
+      "LIDL #1527": "LIDL",
+      "ALDI": "ALDI",
+      "TRF P/ LISA FRANCINE OSBORNE": "COSTCO",
+      "E LECLERC": "LECLERK",
+      "LECLERC": "LECLERK",
+      "ELECLERC": "LECLERK",
+      "WELL S VIVACI CALDAS": "WELLS",
+      "WELLS S": "WELLS",
+      "WELL S ": "WELLS",
+      "WELLS OPTICA": "WELLS",
+      "PINGO DOCE": "PINGO DOCE"
+    },
     "payee_contains": [
       "LIDL AGRADECE",
       "LIOL AGRADECE",
@@ -567,7 +591,7 @@
       "ALTA RESTAURANTE",
       "QUINTA SENHORA DO ARRIO"
     ],
-    "weight": 142,
+    "weight": 145,
     "fragment_weights": {
       "Cais do Parque": 15,
       "PROHIBITION": 3,
@@ -594,10 +618,13 @@
       "PIZZA HUT": 4,
       "LETRARIA": 1,
       "KASTHAMANDAP": 3,
+      "CAMAROEIRO REAL": 1,
       "ORIENTE REST BUFFET": 1,
       "LITRO": 1,
+      "LEITAO DA MEALHADA": 1,
       "RAZZLE DAZZLE": 1,
       "AVOCADO": 1,
+      "DONA BRANCA": 1,
       "CASA DO BINGRE": 1,
       "ESPLANADA DO JARDIM": 1,
       "Roots": 1,
@@ -632,7 +659,7 @@
       "SPDAD - Sociedade Portugu",
       "WWW.REALIQ.ONLINE"
     ],
-    "weight": 53,
+    "weight": 55,
     "fragment_weights": {
       "EVDCR": 12,
       "ETNAGA CONS": 1,
@@ -648,6 +675,8 @@
       "BALLET": 5,
       "COGNITIVEMETRICS": 1,
       "Globalpix Marathonphoto": 1,
+      "TEATROJLSILVA": 1,
+      "RunningXpert": 1,
       "WWW.REALIQ.ONLINE": 1,
       "RUNKD.IT 0-55EC-4EF1-803D": 1
     }
@@ -768,7 +797,7 @@
       "INATURALIST",
       "ECOGROWING"
     ],
-    "weight": 71,
+    "weight": 72,
     "fragment_weights": {
       "MB WAY P/ *****9181": 19,
       "CLUB PADEL": 6,
@@ -784,6 +813,7 @@
       "JAMINE": 1,
       "CRONOMETER": 1,
       "PLAYTOMIC": 5,
+      "WAVEMOTION": 1,
       "INATURALIST": 1,
       "SPRINTER MEGACENTROS DEL": 1
     }
@@ -886,12 +916,14 @@
       "TCD.IE STUDENT FINANCE",
       "CE SHOP REAL ESTATE ED"
     ],
-    "weight": 114,
+    "weight": 122,
     "fragment_weights": {
       "Ordem Pagamento s/Estrangeiro": 2,
-      "MB WAY P/ *****4493": 28,
+      "****4493": 33,
       "Vasiliki Flora": 4,
       "IRIS SILVA ROCHA": 26,
+      "****#*4493": 2,
+      "*##4493": 1,
       "ELLINOPOULA": 10,
       "PRACTICEPORTUGUESE.COM": 19,
       "ITALKI": 20,
@@ -1034,7 +1066,7 @@
       "TAP AIRLINE 0474207049847",
       "ET CAR HIRE"
     ],
-    "weight": 60,
+    "weight": 62,
     "fragment_weights": {
       "ESTREMOZ": 2,
       "SEVILLA": 8,
@@ -1047,6 +1079,7 @@
       "LA BELLA PIZZA V N MILF": 1,
       "BRISA AREAS SERVICO": 1,
       "46827/086126624": 1,
+      "PONTA DELGADA": 2,
       "PONTA DELGAGADA": 1,
       "GERES": 1,
       "VIKING": 5,
@@ -1159,13 +1192,14 @@
       "MB WAY DE  JOSEPHINE PHILIPPE",
       "MB WAY DE  LUCIANA AIRES"
     ],
-    "weight": 29,
+    "weight": 32,
     "fragment_weights": {
       "HMGIFTS": 10,
       "H.M.ROSA": 2,
       "NOGUEIRA": 2,
       "PAPELARIA ALMEIDA": 1,
       "COMERCIO ARTIGO": 2,
+      "MUJI": 3,
       "TRF MB WAY P/ *****8823": 1,
       "ALE HOP": 2,
       "TANIMARA COMERCIO": 2,
@@ -1291,7 +1325,7 @@
       "MUJI FAUBOURG ST.ANTOI",
       "SPDAD - Sociedade Portugu"
     ],
-    "weight": 22,
+    "weight": 21,
     "fragment_weights": {
       "WOMEN SECRET": 1,
       "Biju Ericeira": 1,
@@ -1307,7 +1341,6 @@
       "SP VOXY": 1,
       "LEIRIASHOPPING": 1,
       "MOVE DANCE": 1,
-      "MUJI FAUBOURG ST.ANTOI": 1,
       "BILLABONG": 1,
       "CAPEZIO": 1,
       "ORIVESARIA": 1,
@@ -1347,13 +1380,12 @@
       "MUJI CHIADO Lisbon",
       "HM PT0301 Lisboa PT"
     ],
-    "weight": 28,
+    "weight": 27,
     "fragment_weights": {
       "DECATHLON": 12,
       "SPRINGFIELD": 5,
       "OSLO": 2,
       "HM PT0301 Lisboa PT": 1,
-      "MUJI CHIADO Lisbon": 1,
       "MANGO LISBOA": 1,
       "VANS COLOMBO": 1,
       "LISBON COLOMBO J3PO": 1,
@@ -1377,10 +1409,11 @@
       "GOFNDME",
       "DONORSCHOOSE"
     ],
-    "weight": 13,
+    "weight": 14,
     "fragment_weights": {
       "MACMILLAN CANCER": 1,
       "GoFundMe": 6,
+      "ACT*time to": 1,
       "GOFNDME": 4,
       "DONORSCHOOSE": 1,
       "CHUFFED.OR": 1
@@ -1412,12 +1445,22 @@
       "MB way P/ *****3313": "Marg Cunha",
       "MARGARIDA DOMINGUES DA CUNHA": "Marg Cunha",
       "MB WAY P/ *****3313": "Marg Cunha",
+      "MARGARIDA CUNHA": "Marg Cunha",
       "TRF MB way P/ *****6234": "J Santos",
       "TRE MB WAY P/ *****6234": "J Santos",
       "RESPOSTAS INVISIVEIS": "J Santos",
       "Respostas Invisiveis": "J Santos",
       "TRF MB WAY P/ *****6234": "J Santos",
-      "**6§234": "J Santos"
+      "**6§234": "J Santos",
+      "SANAPSY": "J Santos",
+      "Associacao pelicano radiante": "quinta de salir",
+      "PELICANO RADIANTE": "quinta de salir",
+      "Pelicano Radiante Associacao": "quinta de salir",
+      "QUINTAS": "quinta de salir",
+      "CHILDREN S": "Dr. Andreia",
+      "CHILDRENS WORLD": "Dr. Andreia",
+      "CHILOREN S WORLD": "Dr. Andreia",
+      "PIMPOES": "PIMPOES"
     },
     "payee_contains": [
       "TRF MB WAY P/ *****4952",
@@ -1444,7 +1487,7 @@
       "MB way P/ *****3313",
       "PIMPOES"
     ],
-    "weight": 143,
+    "weight": 144,
     "fragment_weights": {
       "TRF MB WAY P/ *****6234": 5,
       "CHILDREN S": 36,
@@ -1459,6 +1502,7 @@
       "Respostas Invisiveis": 1,
       "MARGARIDA DOMINGUES DA CUNHA": 2,
       "CHILOREN S WORLD": 2,
+      "**6§234": 1,
       "TRF MB way P/ *****6234": 4,
       "MB way P/ *****3313": 3,
       "TRE MB WAY P/ *****6234": 1,
