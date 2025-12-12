@@ -111,6 +111,10 @@
     "name": "Dental",
     "group_id": "c203f5c6-a35d-4fae-ba4e-e4814059c637",
     "group_name": "True Expenses",
+    "sub-category": {
+      "ORTHOLINTO": "Ortholinto",
+      "MEDICO DA AV": "Bob/Hella/Chris Dentist"
+    },
     "payee_contains": [
       "SAUDE ORAL",
       "ORTHOLINTO",
@@ -772,6 +776,14 @@
     "group_name": "Second Tier Expenses: Luxuries and Lifestyle",
     "comment": "not including diving which is in travel now",
     "who": "CM",
+    "sub-category": {
+      "MB WAY P/ *****9181": "Nuno",
+      "NUNO MIGU": "Nuno",
+      "MB WAY P/ *****3133": "Jamine",
+      "JAMINE": "Jamine",
+      "MB WAY P/ *****5954": "Rafael",
+      "RAFAEL SILVA CUNHA": "Rafael"
+    },
     "payee_contains": [
       "MB WAY P/ *****5954",
       "MB WAY P/ *****9181",
@@ -896,6 +908,13 @@
     "name": "Lessons & Learning",
     "group_id": "850bc6c5-c687-47a1-98a2-2d658d650e38",
     "group_name": "Second Tier Expenses: Luxuries and Lifestyle",
+    "sub-category": {
+      "IRIS SILVA ROCHA": "IRIS",
+      "****#*4493": "IRIS",
+      "*##4493": "IRIS",
+      "****4493": "IRIS",
+      "MB WAY P/ *****4493": "IRIS"
+    },
     "payee_contains": [
       "MB WAY P/ *****9821",
       "xxxxCOMISSAO TRF MBWAY 32.00",
@@ -1117,6 +1136,7 @@
       "Kindle",
       "FNAC.PT",
       "FNAC",
+      "ITCH.IO",
       "LIVRARIA",
       "PORTO EDITORA",
       "LIDEL LISBOA",
@@ -1514,6 +1534,13 @@
     "name": "Fitness & Health Hacking",
     "group_id": "850bc6c5-c687-47a1-98a2-2d658d650e38",
     "group_name": "Second Tier Expenses: Luxuries and Lifestyle",
+    "sub-category": {
+      "BALANCE HEALTH": "Balance",
+      "Balance Health": "Balance",
+      "BALANCE CLUB": "Balance",
+      "BALANCE CALDAS": "Balance",
+      "FF CALDAS": "Fitness Factory"
+    },
     "payee_contains": [
       "OXYGYM",
       "BALANCE HEALTH",

@@ -104,9 +104,10 @@ def pie_data():
             summary = get_trans().copy()
         else:
             summary = get_trans().query(qstr).copy()
+        # the fact that year is in here makes no sense.  
+        summary = summary.groupby(['category'])['amount'].sum().reset_index()
         summary.amount = summary.amount.apply(lambda negamt : abs(round( Decimal(negamt),2))) # pie positive numbers only
-        summary = summary.groupby(['category','year'])['amount'].sum().reset_index()
-        top10 = summary.sort_values(by=["year","amount","category"],ascending=[True,False,True]).iloc[:15]
+        top10 = summary.sort_values(by=["amount","category"],ascending=[False,True]).iloc[:15]
         return top10
     else:
         category = data_selected["category"].to_numpy()[0]
@@ -121,14 +122,9 @@ def pie_data():
             qstr1 = f"category ==  '{category}' and year == '{year_month}'"
         # Filter data for selected category and dates
         data = get_trans().query(qstr1).copy()
-        data.amount = data.amount.apply(lambda negamt : abs(round( Decimal(negamt),2))) # pie positive numbers only
-        #populate empty subcats with desc
-        #data.loc[data["subcat"].isin(["",None])] = trans["desc"]
-        #mask = data["subcat"].astype(str).str.strip() == ""
-        #trans.loc[mask, "subcat"] = trans.loc[mask, "desc"]
         data['subcat'] = data.subcat.combine_first(data.desc)
-#        data['subcat'] = data.apply(lambda x: x["desc"] if x['subcat'] == "" else  x["subcat"], axis=1)
         data = data.groupby('subcat')['amount'].sum().reset_index()
+        data.amount = data.amount.apply(lambda negamt : abs(round( Decimal(negamt),2))) # pie positive numbers only
         data = data.rename(columns={'subcat': 'category'})
         return data
 
