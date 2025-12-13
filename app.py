@@ -49,22 +49,27 @@ with ui.value_box(showcase=icon("piggy-bank")):
         return '{:20,.2f}'.format(get_summary()["amount"].sum())
 
 
-with ui.layout_columns(col_widths=[5,7]):
+with ui.layout_columns(col_widths=[5,7,12]):
 
-    @render.data_frame
-    def summary_df():
-        #round(2) would work better if the column was already a decimal. 
-        return render.DataGrid(get_summary(), filters=True, selection_mode="rows")
-    @render.plot
-    def my_scatter():
-        top10 = pie_data()
-        return plt.pie(x = top10.amount, labels = top10.category)
+    with ui.card(full_screen=True):
+        ui.card_header("Summary Data")
+        @render.data_frame
+        def summary_df():
+            #round(2) would work better if the column was already a decimal. 
+            return render.DataGrid(get_summary(), filters=True, selection_mode="rows")
+
+    with ui.card(full_screen=True):
+        @render.plot
+        def my_scatter():
+            top10 = pie_data()
+            return plt.pie(x = top10.amount, labels = top10.category)
 
 
-with ui.layout_columns():
-    @render.data_frame
-    def transactions_df():
-        return render.DataGrid(filtered_df(), filters=True)  
+    with ui.card(full_screen=True):
+        ui.card_header("Detail Data")
+        @render.data_frame
+        def transactions_df():
+            return render.DataGrid(filtered_df(), filters=True)  
     
 
 @reactive.calc
