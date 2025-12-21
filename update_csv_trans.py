@@ -165,7 +165,7 @@ def update_categories_file(catlist):
     #Write the updated categories (and weights) back to the categories_udated.json file
     catFile = "categories_updated.json"
     with open(catFile, "w") as jFile:
-            json.dump(catlist, jFile)
+            json.dump(catlist, jFile, indent=2)
 
 def load_updated_categories(reset=False):
     cats = []
@@ -216,7 +216,7 @@ category_list = load_updated_categories(True)
 # where is the amazon?
 work = [
   {
-    "infile": "/Users/cmcnally/Dropbox/python/textfiles/uncategorized-mil-2025-fixed.csv",
+    "infile": "/Users/cmcnally/Dropbox/python/textfiles/uncategorized-mil-2025.csv",
     "outfile": "/Users/cmcnally/Dropbox/python/textfiles/categorized-mil-2025.csv",
     "do_atm": True,
     "do_cats": True,
@@ -237,7 +237,7 @@ work = [
     "writeFile": True
   },
   {
-    "infile": "/Users/cmcnally/Dropbox/python/textfiles/categorized-amazon-2024-2025-date-fixed.csv",
+    "infile": "/Users/cmcnally/Dropbox/python/textfiles/categorized-amazon-2024-2025.csv",
     "outfile": "/Users/cmcnally/Dropbox/python/textfiles/alread-done.csv",
     "do_cats": False,
     "do_atm": False,
@@ -254,7 +254,7 @@ for w in work:
     if w["writeFile"]:
         write_updated_transactions(transactions,w["outfile"])
     all_trans.extend(transactions)
-update_categories_file(category_list)
+#update_categories_file(category_list)
 
 #do all of them
-write_updated_transactions(all_trans,"/Users/cmcnally/Dropbox/python/textfiles/categorized-all-2024-2025.csv")
+write_updated_transactions(all_trans,"/Users/cmcnally/Dropbox/python/textfiles/categorized-all-2024-2025.csv",date_format='%Y-%m-%d')

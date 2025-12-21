@@ -61,8 +61,8 @@ with ui.layout_columns(col_widths=[5,7,12]):
     with ui.card(full_screen=True):
         @render.plot
         def my_scatter():
-            top10 = pie_data()
-            return plt.pie(x = top10.amount, labels = top10.category)
+            top10 = get_pie_data()
+            return plt.pie(x = top10.amount, labels = top10.category, autopct='%1.2f%%')
 
 
     with ui.card(full_screen=True):
@@ -97,7 +97,7 @@ def filtered_df():
         return get_trans().query(qstr1)
     
 @reactive.calc
-def pie_data():
+def get_pie_data():
     data_selected = summary_df.data_view(selected=True)
     if ( data_selected.empty):
         qstr = ""
@@ -112,7 +112,7 @@ def pie_data():
         # the fact that year is in here makes no sense.  
         summary = summary.groupby(['category'])['amount'].sum().reset_index()
         summary.amount = summary.amount.apply(lambda negamt : abs(round( Decimal(negamt),2))) # pie positive numbers only
-        top10 = summary.sort_values(by=["amount","category"],ascending=[False,True]).iloc[:15]
+        top10 = summary.sort_values(by=["amount","category"],ascending=[False,True]).iloc[:10]
         return top10
     else:
         category = data_selected["category"].to_numpy()[0]
@@ -123,15 +123,23 @@ def pie_data():
             year_month = data_selected["year_month"].to_numpy()[0]
             qstr1 = f"category ==  '{category}' and year_month == '{year_month}'"
         else:
-            year_month = data_selected["year"].to_numpy()[0]
-            qstr1 = f"category ==  '{category}' and year == '{year_month}'"
+            year = data_selected["year"].to_numpy()[0]
+            qstr1 = f"category ==  '{category}' and year == '{year}'"
         # Filter data for selected category and dates
         data = get_trans().query(qstr1).copy()
         data['subcat'] = data.subcat.combine_first(data.desc)
         data = data.groupby('subcat')['amount'].sum().reset_index()
         data.amount = data.amount.apply(lambda negamt : abs(round( Decimal(negamt),2))) # pie positive numbers only
         data = data.rename(columns={'subcat': 'category'})
-        return data
+        top10 = data.sort_values(by=["amount","category"],ascending=[False,True]).iloc[:10]
+        top10_rows = len(data.index)
+        if (top10_rows <= 10):
+            return top10
+        rest_amt = data.sort_values(by=["amount","category"],ascending=[False,True]).tail(top10_rows - 10)['amount'].sum()
+        # Creating a new row as a DataFrame
+        new_row = pd.DataFrame({'category': ['The Rest'], 'amount': [rest_amt]})
+        top10 = pd.concat([top10, new_row],ignore_index=True)
+        return top10.sort_values(by=["amount","category"],ascending=[False,True])
 
 
 @reactive.calc

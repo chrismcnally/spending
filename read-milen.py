@@ -46,6 +46,75 @@ def fix_credits(dataf):
     dataf.loc[dataf["desc"].str.contains("transferwise", case=False, na=False),"newt",] = "P"
     dataf.loc[dataf["desc"].str.contains("EMILY HELLA TSACONAS", case=True, na=False),"newt",] = "P"
     # this one too "Wise" and "Ord.Pgt.do Estrg"
+
+def process_2024():
+    # process 2024 data from PDF scrape
+    dataf = readPdfExtract("converted_statements-final-fixed.csv")
+    dataf = initOtherColumns(dataf)
+    dataf["newt"] = dataf["type"]
+    dataf = fix_credits(dataf)
+    header = ["lance","dv","desc","amount","newt","balance","usd","erate","memo","category","subcat","fragment","who"]
+    # this is putting the dates in mm-dd-yy format, not ok, need yyyy-mm-dd untested change
+    dataf.to_csv("/Users/cmcnally/Dropbox/python/textfiles/uncategorized-mil-2024.csv", index=False, columns=header,date_format='%Y%m%d')
+
+def process_2025(fileName = None):
+    # 2025 data files code is below
+    if (fileName is not None):
+        dataf = readMil(fileName)
+    else:
+        dataf = pd.concat(map(readMil,files_2025),axis = 0, ignore_index=True)
+    dataf = dataf.sort_values(by=['lance', 'balance'], ascending=[True,False])
+    #print(dataf.sort_values(by=["lance","dv"]).head(10))
+    # add extra columns for the rate and usd
+    dataf = initOtherColumns(dataf)
+    # convert Debito to D (in a new column newt)
+    dataf.loc[dataf.type == "Débito",'newt'] = "D"
+    dataf.loc[dataf.type == "Crédito",'newt'] = "C"
+    # fix transferwise here now to Payment
+    dataf.loc[dataf["desc"].str.contains("Wise", case=True, na=False),"newt"] = "P"
+# this does not work because it thinks its a regexp with the (), so do it manually in the csv file
+#   dataf.loc[dataf["desc"].str.contains("Ord.Pgt.do Estrg./SCH REF(Y 1 0000077134801)", case=False, na=False),"newt"] = "P"
+    header = ["lance","dv","desc","amount","newt","balance","usd","erate","memo","category","subcat","fragment","who"]
+    outfile = f'{PATH_F}uncategorized-mil-{fileName or "2025"}.csv'  
+    dataf.to_csv(outfile, index=False,encoding="ascii", columns=header,date_format='%Y-%m-%d')
+#    dataf.to_csv("/Users/cmcnally/Dropbox/python/textfiles/uncategorized-mil-2025.csv", index=False,encoding="ascii", columns=header,date_format='%Y%m%d')
+
+def process_2023():
+    #this code that follows was for the old YNAB data
+    dataf = pd.concat(map(readMil,files_2023),axis = 0, ignore_index=True)
+    #the following was before we had all months, now we have data from the begingin
+    startingBalance = Decimal(38190.71) #sum of all transfers in prior to 10/1/2021=
+    balance10_1 = Decimal(25004.90) # based on the downloaded transactions, balance was on 10/1
+    alreadyUsed = Decimal(-13185.80) # this needs to be removed first from the tuple
+    # don't have to do this when we have all months and we do rate = getRateApplyDebit(amount=alreadyUsed)
+    droppings = []
+    rate = Decimal("1.2")
+    dataf.sort_values(by=["lance","dv","balance"], ascending=[True, True, False], inplace=True)
+    for index, item in dataf.iterrows():
+        if item["type"].startswith("D"):
+            if item["amount"] > 1.0:
+                item["amount"] = Decimal(0.0) - item["amount"]
+            rate = getRateApplyDebit(None, item)
+            item["erate"] = rate
+            item["usd"] = item["amount"] * rate
+            item["memo"] = createMemo(item)
+            dataf.loc[index] = item
+        elif item["type"].startswith("Cr"):
+            usd = getUSDForCredit(item,rate) # default to the last rate if we don't have it
+            item["usd"] = usd
+            item["erate"] = usd / item["amount"]
+            item["memo"] = createMemo(item)
+            dataf.loc[index] = item
+        else:
+            print(item)
+            droppings.append(index) #these are being removed, what are they 
+    dataf['usd'] = dataf.usd.apply(lambda x : float(x)) #why? oh for to_csv which allows a float format
+    dataf = dataf.drop(droppings)
+    dataf.sort_values(by=["lance","dv","balance"], ascending=[True, True, False]).to_csv('/Users/cmcnally/Downloads/all-months-with-usd.csv')
+    dataf.to_csv(float_format="%.2f",columns=["dv","desc","memo","usd"],header=["Date","Payee","Memo","Amount"],
+    index_label=False,index=False,path_or_buf="/Users/cmcnally/Downloads/all-months-for-ynab.csv")
+
+
 def getUSDForCredit(item = None, defaultRate=Decimal("1.2")):
     euros = item["amount"]
     #print(item)
@@ -141,7 +210,7 @@ exchanges = tuple(
 {"tdate":datetime.datetime(2023,10,9), "tusd":Decimal(3000), "teuro":Decimal("2831.06"), "erate":Decimal(1.1059)},
 )
 )
-files = ("JULY-2021-2.csv",
+files_2023 = ("JULY-2021-2.csv",
         "AUG-2021-2.csv",
         "SEPT-2021-2.csv",
         "OCT-2021.csv",
@@ -160,78 +229,18 @@ files = ("JULY-2021-2.csv",
         "NOV-2022.csv",
         "DEC-2022.csv","JAN-2023.csv","FEB-2023.csv","MARCH-2023.csv","APRIL-2023.csv","MAY-2023.csv",
         "JUNE-2023.csv","JULY-2023.csv","AUG-2023.csv","SEPT-2023.csv","OCT-2023.csv")
-files = ("Portugues-bank-2024-12.csv",
+files_2024 = ( "Portugues-bank-2024-12.csv") # these were done as pdfs
+files_2025 = (
 "Portugues-bank-2025-01.csv","Portugues-bank-2025-02.csv",
 "Portugues-bank-2025-03.csv","Portugues-bank-2025-04.csv",
 "Portugues-bank-2025-05.csv","Portugues-bank-2025-06.csv",
 "Portugues-bank-2025-07.csv","Portugues-bank-2025-08.csv",
 "Portugues-bank-2025-09.csv","Portugues-bank-2025-10.csv",
-"Portugues-bank-2025-11.csv")
-
-# process 2024 data from PDF scrape
-dataf = readPdfExtract("converted_statements-final-fixed.csv")
-dataf = initOtherColumns(dataf)
-dataf["newt"] = dataf["type"]
-dataf = fix_credits(dataf)
-header = ["lance","dv","desc","amount","newt","balance","usd","erate","memo","category","subcat","fragment","who"]
-# this is putting the dates in mm-dd-yy format, not ok, need yyyy-mm-dd untested change
-dataf.to_csv("/Users/cmcnally/Dropbox/python/textfiles/uncategorized-mil-2024.csv", index=False, columns=header,date_format='%Y%m%d')
-
-# 2025 data files code is below
-
-# make a panda dataframe from all the files
-dataf = pd.concat(map(readMil,files),axis = 0, ignore_index=True)
-#balance = Decimal(0.0)
-
-#dataf, balance  = append_some_credits(dataf)
-
-dataf = dataf.sort_values(by=['lance', 'balance'], ascending=[True,False])
-#print(dataf.sort_values(by=["lance","dv"]).head(10))
-# add extra columns for the rate and usd
-dataf = initOtherColumns(dataf)
-# convert Debito to D (in a new column newt)
-dataf.loc[dataf.type == "Débito",'newt'] = "D"
-dataf.loc[dataf.type == "Crédito",'newt'] = "C"
-header = ["lance","dv","desc","amount","newt","balance","usd","erate","memo","category","subcat","fragment","who"]
-dataf.to_csv("/Users/cmcnally/Dropbox/python/textfiles/uncategorized-mil-2025.csv", index=False,encoding="ascii", columns=header,date_format='%Y%m%d')
+"Portugues-bank-2025-11.csv","Portugues-bank-2025-12.csv")
 
 
-#this code that follows was for the old YNAB data
+#process_2024()
 
-#the following was before we had all months, now we have data from the begingin
-startingBalance = Decimal(38190.71) #sum of all transfers in prior to 10/1/2021=
-balance10_1 = Decimal(25004.90) # based on the downloaded transactions, balance was on 10/1
-alreadyUsed = Decimal(-13185.80) # this needs to be removed first from the tuple
-# don't have to do this when we have all months and we do rate = getRateApplyDebit(amount=alreadyUsed)
-droppings = []
-rate = Decimal("1.2")
-dataf.sort_values(by=["lance","dv","balance"], ascending=[True, True, False], inplace=True)
-for index, item in dataf.iterrows():
-    if item["type"].startswith("D"):
-        if item["amount"] > 1.0:
-            item["amount"] = Decimal(0.0) - item["amount"]
-        rate = getRateApplyDebit(None, item)
-        item["erate"] = rate
-        item["usd"] = item["amount"] * rate
-        item["memo"] = createMemo(item)
-        dataf.loc[index] = item
-    elif item["type"].startswith("Cr"):
-        usd = getUSDForCredit(item,rate) # default to the last rate if we don't have it
-        item["usd"] = usd
-        item["erate"] = usd / item["amount"]
-        item["memo"] = createMemo(item)
-        dataf.loc[index] = item
-    else:
-        print(item)
-        droppings.append(index) #these are being removed, what are they 
-dataf['usd'] = dataf.usd.apply(lambda x : float(x)) #why? oh for to_csv which allows a float format
-dataf = dataf.drop(droppings)
-dataf.sort_values(by=["lance","dv","balance"], ascending=[True, True, False]).to_csv('/Users/cmcnally/Downloads/all-months-with-usd.csv')
-dataf.to_csv(float_format="%.2f",columns=["dv","desc","memo","usd"],header=["Date","Payee","Memo","Amount"],
-index_label=False,index=False,path_or_buf="/Users/cmcnally/Downloads/all-months-for-ynab.csv")
+process_2025()
 
-#usds = list(range(0,dataf["amount"].count()))
-#dataf.info()
-#dataf.head(10)
-#Date,Payee,Memo,Outflow,Inflow
-#def applyRateFixMemo(dfr)
+#process_2023()

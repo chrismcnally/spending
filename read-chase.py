@@ -30,7 +30,7 @@ def add_usd_other_fields(dataf):
     dataf["fragment"] = ""
     dataf["newt"] = "D"
     dataf["who"] = ""
-
+    dataf["dv"] = dataf.dv.apply(lambda x : x[0:10])
     dataf["year_month"] = dataf.lance.apply(lambda x : x.date().strftime("%Y%m"))
     dataf["erate"] = dataf.year_month.apply(lambda key :  monthly_ex_rates[key][0]  )
     dataf['usd'] = dataf.amount.apply(lambda usdol : round( Decimal(usdol),2)) # copy euro into usd  column
@@ -54,6 +54,7 @@ def add_euro_other_fields(dataf):
     dataf["newt"] = "D"
     dataf["who"] = ""
 
+    dataf["dv"] = dataf.dv.apply(lambda x : x[0:10])
     dataf["year_month"] = dataf.lance.apply(lambda x : x.date().strftime("%Y%m"))
     dataf["erate"] = dataf.year_month.apply(lambda key :  monthly_ex_rates[key][0]  )
     dataf['amount'] = dataf.usd.apply(lambda usdol : round( Decimal(usdol),2)) # copy usd into euro  column
@@ -89,7 +90,8 @@ monthly_ex_rates = {
 "202508" : 	(1.165494, 0.858019 ),
 "202509" :	(1.173437, 0.852212 ),
 "202510" : 	(1.164413, 0.858819 ),
-"202511" : 	(1.156707, 0.864535 )
+"202511" : 	(1.156707, 0.864535 ),
+"202512" :  (1.168906, 0.85552)
 }
 # convert ctype to newt (D or C)
 # convert amount to Euros (from usd)
@@ -99,8 +101,6 @@ euros = read_amazon_euros(file)
 euros = euros[['lance', 'dv', 'desc','amount','category']].copy()
 euros = add_usd_other_fields(euros)
 
-#for index, tran in trans.iterrows():
-#    print(tran)
 file = "Amazon-2024-2025-usd.csv"
 usds = read_amazon_usd(file)
 usds = usds[['lance', 'dv', 'desc','amount','category']].copy()
@@ -108,10 +108,9 @@ usds = add_euro_other_fields(usds)
 
 trans = pd.concat([euros,usds])
 header = ["lance","dv","desc","amount","newt","balance","usd","erate","memo","category","subcat","fragment","who"]
-trans.to_csv("/Users/cmcnally/Dropbox/python/textfiles/categorized-amazon-2024-2025.csv", index=False, columns=header)
+trans.to_csv("/Users/cmcnally/Dropbox/python/textfiles/categorized-amazon-2024-2025.csv", index=False, columns=header,date_format='%Y-%m-%d')
 
-files = ("Chase_Activity-2024.csv","Chase_Activity-2025.csv")
-# make a panda dataframe from all the files
+files = ("Chase_Activity-2024.csv","Chase_Activity-2025.csv","Chase-12-2025.csv","atms-from-schwab-2024-2025.csv")
 dataf = pd.concat(map(read_chase,files),axis = 0, ignore_index=True)
 dataf = dataf.sort_values(by=['lance', 'dv'], ascending=[True,True])
 
