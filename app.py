@@ -62,7 +62,8 @@ with ui.layout_columns(col_widths=[5,7,12]):
         @render.plot
         def my_scatter():
             top10 = get_pie_data()
-            return plt.pie(x = top10.amount, labels = top10.category, autopct='%1.2f%%')
+            toal = top10.amount.sum()
+            return plt.pie(x = top10.amount, labels = top10.category, autopct = lambda x : '€{:,.0f}'.format(Decimal(x.item()) * Decimal(toal)/Decimal(100.0) ) )
 
 
     with ui.card(full_screen=True):
