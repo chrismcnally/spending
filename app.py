@@ -113,8 +113,16 @@ def get_pie_data():
         # the fact that year is in here makes no sense.  
         summary = summary.groupby(['category'])['amount'].sum().reset_index()
         summary.amount = summary.amount.apply(lambda negamt : abs(round( Decimal(negamt),2))) # pie positive numbers only
-        top10 = summary.sort_values(by=["amount","category"],ascending=[False,True]).iloc[:10]
+        top10 = summary.sort_values(by=["amount","category"],ascending=[False,True]).iloc[:12]
         return top10
+#        top10_rows = len(summary.index)
+#        if (top10_rows <= 12):
+#            return top10
+#        rest_amt = summary.sort_values(by=["amount","category"],ascending=[False,True]).tail(top10_rows - 12)['amount'].sum()
+        # Creating a new row as a DataFrame
+#        new_row = pd.DataFrame({'category': ['The Rest'], 'amount': [rest_amt]})
+#        top10 = pd.concat([top10, new_row],ignore_index=True)
+#        return top10.sort_values(by=["amount","category"],ascending=[False,True])
     else:
         category = data_selected["category"].to_numpy()[0]
         category = category.replace("'","\\'",1)

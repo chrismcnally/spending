@@ -385,6 +385,7 @@
       "NSTITITO MICROC": "Glasses/Contacts",
       "FARMACIA": "Pharmacy",
       "OARHEALTH": "Pharmacy",
+      "Allday": "Pharmacy",
       "IHERB": "Pharmacy",
       "JCLAC POSTO BLC": "Blood Tests",
       "JOAQUIM CHAVES": "Blood Tests"
@@ -1068,7 +1069,9 @@
       "TAP AIRLINE 0470010421404": "Bob visit August",
       "TAP AIR     000001251641": "Bob visit April",
       "PASARON": "Caceres",
-      "GERES": "GERES"
+      "GERES": "GERES",
+      "SALAMA": "SALAMANCA",
+      "SALAMANCA": "SALAMANCA"
     },
     "payee_contains": [
       "Patricia Sue Danner",
@@ -1090,6 +1093,7 @@
       "TAP AIRLINE 0474207095446",
       "GRANDOLA",
       "SALAMANCA",
+      "SALAMA",
       "SANTAGLORIA",
       "BRISA AREAS SERVICO",
       "LA BELLA PIZZA V N MILF",
@@ -1600,6 +1604,13 @@
     "name": "Media Subscriptions",
     "group_id": "850bc6c5-c687-47a1-98a2-2d658d650e38",
     "group_name": "Second Tier Expenses: Luxuries and Lifestyle",
+    "sub-category": {
+      "hbomax.com": "HBO Max",
+      "help.max.com": "HBO Max",
+      "HELP.HBOMAX.COM": "HBO Max",
+      "NETFLIX.COM": "Netflix",
+      "Netflix.com": "Netflix"
+    },
     "payee_contains": [
       "MEDIOESTE",
       "hbomax.com",
