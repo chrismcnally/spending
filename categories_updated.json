@@ -778,8 +778,6 @@
     "group_id": "850bc6c5-c687-47a1-98a2-2d658d650e38",
     "group_name": "Second Tier Expenses: Luxuries and Lifestyle",
     "payee_contains": [
-      " ATHENS",
-      " ATHINA",
       "IGKOU REPOUSI ANNA KERAMEIKOY",
       "OASA ETICKET",
       "DUTY FREE SPATON",
@@ -1697,6 +1695,8 @@
     "group_id": "850bc6c5-c687-47a1-98a2-2d658d650e38",
     "group_name": "Second Tier Expenses: Luxuries and Lifestyle",
     "payee_contains": [
+      " ATHENS",
+      " ATHINA",
       "LEVALLOIS-PERRET",
       "CHAVIARAS STEFANOS",
       "TURTLECHAPTER",
@@ -1787,6 +1787,7 @@
       "AIRALO",
       "EASYJET AIR KBDM9M4",
       "AIRBNB * HME22PMMAF",
+      "POLICIA NACIONAL",
       "EWR ",
       "AMERICAN AI",
       "AMALIE CAR RENTAL",
@@ -1882,7 +1883,8 @@
     "payee_contains": [
       "LEV ATM 0885",
       "ATM 0885",
-      "Lev ATw 0885"
+      "Lev ATw 0885",
+      "ATM 9496"
     ],
     "weight": 51,
     "fragment_weights": {

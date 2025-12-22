@@ -12,12 +12,12 @@ def read_chase(filename):
 def read_amazon_euros(filename):
     header = ["junk1","junk2","lance","junk3","junk4","junk5","junk6","junk7","junk8","amount","junk99","junk9","junk10","junk11","junk12","junk13","junk14","junk15","dv","junk17","junk18","junk19","category","desc","Gift_Message","Gift_Sender","Gift_Recipien","Item_Serial"]
     pathf = "/Users/cmcnally/Dropbox/python/textfiles/" + filename
-    return pd.read_csv( pathf, delimiter=",", engine='python',header=None, skiprows=1, names=header,   parse_dates=['dv','lance'], dayfirst=False) 
+    return pd.read_csv( pathf, delimiter=",", engine='python',header=None, skiprows=1, names=header,   parse_dates=['lance'], dayfirst=False) 
  
 def read_amazon_usd(filename):
     header = ["junk1","junk2","lance","junk3","junk4","junk5","junk6","junk7","junk8","amount","junk88","junk9","junk10","junk11","junk12","junk13","junk14","junk15","dv","junk17","junk18","junk19","category","desc","Gift_Message","Gift_Sender","Gift_Recipien","Item_Serial"]
     pathf = "/Users/cmcnally/Dropbox/python/textfiles/" + filename
-    return pd.read_csv( pathf, delimiter=",", engine='python',header=None, skiprows=1, names=header,   parse_dates=['dv','lance'], dayfirst=False) 
+    return pd.read_csv( pathf, delimiter=",", engine='python',header=None, skiprows=1, names=header,   parse_dates=['lance'], dayfirst=False) 
 
 def add_usd_other_fields(dataf):
     dataf['amount'] = dataf.amount.apply(lambda x :round( Decimal(x),2)*Decimal(-1.0)) # make amount a decimal instead of float and negative
@@ -30,7 +30,7 @@ def add_usd_other_fields(dataf):
     dataf["fragment"] = ""
     dataf["newt"] = "D"
     dataf["who"] = ""
-    dataf["dv"] = dataf.dv.apply(lambda x : x[0:10])
+    dataf["dv"] = dataf.dv.apply(lambda x : x[0:10] )
     dataf["year_month"] = dataf.lance.apply(lambda x : x.date().strftime("%Y%m"))
     dataf["erate"] = dataf.year_month.apply(lambda key :  monthly_ex_rates[key][0]  )
     dataf['usd'] = dataf.amount.apply(lambda usdol : round( Decimal(usdol),2)) # copy euro into usd  column
@@ -96,8 +96,8 @@ monthly_ex_rates = {
 # convert ctype to newt (D or C)
 # convert amount to Euros (from usd)
 
-file = "Amazon-2024-2025-eruos.csv"
-euros = read_amazon_euros(file)
+files = ["Amazon-2024-2025-eruos.csv","Amazon-euro-dec-2025.csv"]
+euros = pd.concat(map(read_amazon_euros,files), axis = 0, ignore_index=True)
 euros = euros[['lance', 'dv', 'desc','amount','category']].copy()
 euros = add_usd_other_fields(euros)
 

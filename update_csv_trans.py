@@ -257,4 +257,4 @@ for w in work:
 #update_categories_file(category_list)
 
 #do all of them
-write_updated_transactions(all_trans,"/Users/cmcnally/Dropbox/python/textfiles/categorized-all-2024-2025.csv",date_format='%Y-%m-%d')
+write_updated_transactions(all_trans,"/Users/cmcnally/Dropbox/python/textfiles/categorized-all-2024-2025.csv")

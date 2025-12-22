@@ -127,7 +127,7 @@ def get_pie_data():
             qstr1 = f"category ==  '{category}' and year == '{year}'"
         # Filter data for selected category and dates
         data = get_trans().query(qstr1).copy()
-        data['subcat'] = data.subcat.combine_first(data.desc)
+        data['subcat'] = data.subcat.combine_first(data.desc)# when subcat is null, replace with desc
         data = data.groupby('subcat')['amount'].sum().reset_index()
         data.amount = data.amount.apply(lambda negamt : abs(round( Decimal(negamt),2))) # pie positive numbers only
         data = data.rename(columns={'subcat': 'category'})
