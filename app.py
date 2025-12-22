@@ -61,9 +61,13 @@ with ui.layout_columns(col_widths=[5,7,12]):
     with ui.card(full_screen=True):
         @render.plot
         def my_scatter():
-            top10 = get_pie_data()
+            top10, title = get_pie_data()
             toal = top10.amount.sum()
-            return plt.pie(x = top10.amount, labels = top10.category, autopct = lambda x : '€{:,.0f}'.format(Decimal(x.item()) * Decimal(toal)/Decimal(100.0) ) )
+            fig, ax = plt.subplots()
+            ax.set_title(title)
+            ax.pie(x = top10.amount, labels = top10.category, autopct = lambda x : '€{:,.0f}'.format(Decimal(x.item()) * Decimal(toal)/Decimal(100.0) ) )
+            return fig
+#            return plt.pie(x = top10.amount, labels = top10.category, autopct = lambda x : '€{:,.0f}'.format(Decimal(x.item()) * Decimal(toal)/Decimal(100.0) ) )
 
 
     with ui.card(full_screen=True):
@@ -103,18 +107,21 @@ def get_pie_data():
     if ( data_selected.empty):
         qstr = ""
         if input.input_year() in ["All Years","Date Range"]:
+            title = "All Years"
             qstr = ""
         else:
             qstr = "year == '" + input.input_year() + "'"
+            title = "Year " + input.input_year() 
         if qstr == "":
             summary = get_trans().copy()
         else:
             summary = get_trans().query(qstr).copy()
-        # the fact that year is in here makes no sense.  
+
         summary = summary.groupby(['category'])['amount'].sum().reset_index()
+        total = summary.amount.sum()
         summary.amount = summary.amount.apply(lambda negamt : abs(round( Decimal(negamt),2))) # pie positive numbers only
         top10 = summary.sort_values(by=["amount","category"],ascending=[False,True]).iloc[:12]
-        return top10
+        return top10, f"{title} {total: ,.0f}"
 #        top10_rows = len(summary.index)
 #        if (top10_rows <= 12):
 #            return top10
@@ -126,16 +133,21 @@ def get_pie_data():
     else:
         category = data_selected["category"].to_numpy()[0]
         category = category.replace("'","\\'",1)
+        title = f"Subtotal for {category}"
         by = input.months_or_years()
         qstr1 = ""
         if (by == "Month"): 
             year_month = data_selected["year_month"].to_numpy()[0]
             qstr1 = f"category ==  '{category}' and year_month == '{year_month}'"
+            title = f"{title} and {year_month}"
         else:
             year = data_selected["year"].to_numpy()[0]
             qstr1 = f"category ==  '{category}' and year == '{year}'"
+            title = f"{title} and {year}"
         # Filter data for selected category and dates
         data = get_trans().query(qstr1).copy()
+        total = data.amount.sum()
+        title = f"{title} {total:,.0f}" #{:,.0f}
         data['subcat'] = data.subcat.combine_first(data.desc)# when subcat is null, replace with desc
         data = data.groupby('subcat')['amount'].sum().reset_index()
         data.amount = data.amount.apply(lambda negamt : abs(round( Decimal(negamt),2))) # pie positive numbers only
@@ -143,12 +155,12 @@ def get_pie_data():
         top10 = data.sort_values(by=["amount","category"],ascending=[False,True]).iloc[:10]
         top10_rows = len(data.index)
         if (top10_rows <= 10):
-            return top10
+            return top10, title
         rest_amt = data.sort_values(by=["amount","category"],ascending=[False,True]).tail(top10_rows - 10)['amount'].sum()
         # Creating a new row as a DataFrame
         new_row = pd.DataFrame({'category': ['The Rest'], 'amount': [rest_amt]})
         top10 = pd.concat([top10, new_row],ignore_index=True)
-        return top10.sort_values(by=["amount","category"],ascending=[False,True])
+        return top10.sort_values(by=["amount","category"],ascending=[False,True]), title
 
 
 @reactive.calc
