@@ -18,7 +18,7 @@ def load_categorized_trans():
     all_dates = trans["lance"] #gather all dates. this is a list of the values in that column
     year_months = [x[0:4] + x[5:7] for x in all_dates]  
     years =  [x[0:4]  for x in all_dates]
-#  #  testdates = [x[0:4] + "-" +  x[5:7] + "-01" for x in all_dates]  
+#    testdates = [x[0:4] + "-" +  x[5:7] + "-01" for x in all_dates]  
     trans["year"] = years
     trans["year_month"] = year_months
     trans['amount'] = trans['amount'].apply(lambda x: Decimal(x).quantize(Decimal("0.01"),rounding=ROUND_HALF_UP) )
