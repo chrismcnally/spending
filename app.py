@@ -101,9 +101,7 @@ with ui.value_box(showcase=icon("piggy-bank")):
     "Total Euros"
     @render.ui
     def show_total():
-        cwd = os.getcwd()
-        ld = os.listdir() 
-        return 'Total is {:20,.2f} directory is {} files are {}'.format(get_summary()["amount"].sum(),cwd,ld)
+        return '{:20,.2f} '.format(get_summary()["amount"].sum())
 
 
 with ui.layout_columns(col_widths=[5,7,12]):
