@@ -1,5 +1,4 @@
 shiny
-shiny-express
 pandas
 gspread
 google-auth
