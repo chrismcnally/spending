@@ -30,7 +30,7 @@ def add_usd_other_fields(dataf):
     dataf["fragment"] = ""
     dataf["newt"] = "D"
     dataf["who"] = ""
-    dataf["dv"] = dataf.dv.apply(lambda x : x[0:10] )
+    dataf["dv"] = dataf.dv.apply(lambda x : x[0:10] ) 
     dataf["year_month"] = dataf.lance.apply(lambda x : x.date().strftime("%Y%m"))
     dataf["erate"] = dataf.year_month.apply(lambda key :  monthly_ex_rates[key][0]  )
     dataf['usd'] = dataf.amount.apply(lambda usdol : round( Decimal(usdol),2)) # copy euro into usd  column

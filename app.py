@@ -6,7 +6,24 @@ import csv
 import pandas as pd
 from faicons import icon_svg as icon
 import matplotlib.pyplot as plt
-import os
+import gspread 
+
+S_KEY = "1ai9nZYCNw5g5-fv0-siPryHWYwl7hSfTunq5wswYfDo"
+DICTS = {
+  "installed": {
+    "client_id": "290299696492-9au95o3qkeijg68cvb32cbdm59nvtqcp.apps.googleusercontent.com",
+    "project_id": "spending-482208",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_secret": "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",
+    "redirect_uris": [
+      "http://localhost"
+    ]
+  }
+}
+
+
 
 def load_categorized_trans():
     #trans =  pd.read_csv("textfiles/categorized-all-2024-2025.csv")
@@ -26,7 +43,31 @@ def load_categorized_trans():
    # trans['amount'] = trans['amount'].astype(float)
  
     return  trans.sort_values(by=['year', 'year_month','category'])   
-    
+
+def load_trans_from_gsheet(authorized_user):
+   # gc = gspread.oauth()
+    if (authorized_user is None):
+        gc, authorized_user  = gspread.oauth_from_dict(DICTS)
+    else:
+        gc, authorized_user  = gspread.oauth_from_dict(DICTS, authorized_user)
+
+    sh = gc.open_by_key(S_KEY)
+    worksheet =  sh.get_worksheet(0)
+#    print(worksheet.sheet1.get("A1"))
+   # list_of_dicts = worksheet.get_all_records()  
+    trans = pd.DataFrame(worksheet.get_all_records())
+    trans = trans.loc[trans["newt"].isin(["D", "C"])] # we currently have D, C, P, and F
+    trans['category'] = trans['category'].fillna("Unknown") # mark the unknown category
+    trans.sort_values(by=["lance","dv","balance"], ascending=[True, True, False], inplace=True)
+    trans.drop(columns=["balance","dv","erate","fragment","who"], inplace=True)
+    all_dates = trans["lance"] #gather all dates. this is a list of the values in that column
+    year_months = [x[0:4] + x[5:7] for x in all_dates]  
+    years =  [x[0:4]  for x in all_dates]
+#    testdates = [x[0:4] + "-" +  x[5:7] + "-01" for x in all_dates]  
+    trans["year"] = years
+    trans["year_month"] = year_months
+    trans['amount'] = trans['amount'].apply(lambda x: Decimal(x).quantize(Decimal("0.01"),rounding=ROUND_HALF_UP) )
+    return  trans.sort_values(by=['year', 'year_month','category']), authorized_user   
 
 def make_summary_table(trans):
 #    return trans.groupby([pd.Grouper(key='Category', freq='ME')])['amount'].sum()
@@ -34,7 +75,21 @@ def make_summary_table(trans):
     return summary.reset_index()
 
 
-trans = load_categorized_trans()
+#trans = load_categorized_trans()
+authorized_user = {
+  "refresh_token": "1//03g2muAVysnQmCgYIARAAGAMSNgF-L9Ir-LtyKtenYOWuxu4X3-NeKgMSTCs3mYLaw2P0te051HxXy65z2TlHJVDiRa9BDCDB3Q",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "client_id": "290299696492-9au95o3qkeijg68cvb32cbdm59nvtqcp.apps.googleusercontent.com",
+  "client_secret": "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",
+  "scopes": [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+  ],
+  "universe_domain": "googleapis.com",
+  "account": "",
+  "expiry": "2025-12-26T20:01:45Z"
+}
+trans, authorized_user = load_trans_from_gsheet(authorized_user)
 summary = make_summary_table(trans)
 with ui.sidebar():
     ui.input_selectize("input_year", "Years", choices=("All Years","Date Range","2025","2024","2023"), selected="All Years")
@@ -76,6 +131,7 @@ with ui.layout_columns(col_widths=[5,7,12]):
         ui.card_header("Detail Data")
         @render.data_frame
         def transactions_df():
+#            load_trans_from_gsheet()
             return render.DataGrid(filtered_df(), filters=True)  
     
 
@@ -123,7 +179,7 @@ def get_pie_data():
         total = summary.amount.sum()
         summary.amount = summary.amount.apply(lambda negamt : abs(round( Decimal(negamt),2))) # pie positive numbers only
         top10 = summary.sort_values(by=["amount","category"],ascending=[False,True]).iloc[:12]
-        return top10, f"{title} {total: ,.0f}"
+        return top10, f"{title} €{total: ,.0f}"
 #        top10_rows = len(summary.index)
 #        if (top10_rows <= 12):
 #            return top10
@@ -149,7 +205,8 @@ def get_pie_data():
         # Filter data for selected category and dates
         data = get_trans().query(qstr1).copy()
         total = data.amount.sum()
-        title = f"{title} {total:,.0f}" #{:,.0f}
+        title = f"{title} €{total:,.0f}" #{:,.0f}
+        data["subcat"] = data["subcat"].apply(lambda x: None if x == "" else x)
         data['subcat'] = data.subcat.combine_first(data.desc)# when subcat is null, replace with desc
         data = data.groupby('subcat')['amount'].sum().reset_index()
         data.amount = data.amount.apply(lambda negamt : abs(round( Decimal(negamt),2))) # pie positive numbers only
