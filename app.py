@@ -6,7 +6,7 @@ import csv
 import pandas as pd
 from faicons import icon_svg as icon
 import matplotlib.pyplot as plt
-
+import os
 
 def load_categorized_trans():
     #trans =  pd.read_csv("textfiles/categorized-all-2024-2025.csv")
@@ -46,7 +46,8 @@ with ui.value_box(showcase=icon("piggy-bank")):
     "Total Euros"
     @render.ui
     def show_total():
-        return '{:20,.2f}'.format(get_summary()["amount"].sum())
+        cwd = os.getcwd()
+        return 'Total is {:20,.2f} directory is {} '.format(get_summary()["amount"].sum(),cwd)
 
 
 with ui.layout_columns(col_widths=[5,7,12]):
