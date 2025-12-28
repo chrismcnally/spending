@@ -1,30 +1,17 @@
 from decimal import Decimal,ROUND_HALF_UP
 from shiny import reactive
-import json
 from shiny.express import input, render, ui
-import csv
 import pandas as pd
 from faicons import icon_svg as icon
 import matplotlib.pyplot as plt
 import gspread 
+import os
+import json
 
 S_KEY = "1ai9nZYCNw5g5-fv0-siPryHWYwl7hSfTunq5wswYfDo"
-DICTS = {
-  "installed": {
-    "client_id": "290299696492-9au95o3qkeijg68cvb32cbdm59nvtqcp.apps.googleusercontent.com",
-    "project_id": "spending-482208",
-    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-    "token_uri": "https://oauth2.googleapis.com/token",
-    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-    "client_secret": "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",
-    "redirect_uris": [
-      "http://localhost"
-    ]
-  }
-}
 
 
-
+# old code to load from the file, using a spreadsheet now
 def load_categorized_trans():
     #trans =  pd.read_csv("textfiles/categorized-all-2024-2025.csv")
     trans = pd.read_csv("https://raw.githubusercontent.com/chrismcnally/spending/refs/heads/master/textfiles/categorized-all-2024-2025.csv")
@@ -44,17 +31,12 @@ def load_categorized_trans():
  
     return  trans.sort_values(by=['year', 'year_month','category'])   
 
-def load_trans_from_gsheet(authorized_user):
-   # gc = gspread.oauth()
-    if (authorized_user is None):
-        gc, authorized_user  = gspread.oauth_from_dict(DICTS)
-    else:
-        gc, authorized_user  = gspread.oauth_from_dict(DICTS, authorized_user)
-
+def load_trans_from_gsheet():
+    # json.loads(os.environ["GSPREAD_CREDS_JSON"])
+    credentials =  json.loads(os.environ["SERVICE_JSON"])
+    gc = gspread.service_account_from_dict(credentials)
     sh = gc.open_by_key(S_KEY)
     worksheet =  sh.get_worksheet(0)
-#    print(worksheet.sheet1.get("A1"))
-   # list_of_dicts = worksheet.get_all_records()  
     trans = pd.DataFrame(worksheet.get_all_records())
     trans = trans.loc[trans["newt"].isin(["D", "C"])] # we currently have D, C, P, and F
     trans['category'] = trans['category'].fillna("Unknown") # mark the unknown category
@@ -67,7 +49,7 @@ def load_trans_from_gsheet(authorized_user):
     trans["year"] = years
     trans["year_month"] = year_months
     trans['amount'] = trans['amount'].apply(lambda x: Decimal(x).quantize(Decimal("0.01"),rounding=ROUND_HALF_UP) )
-    return  trans.sort_values(by=['year', 'year_month','category']), authorized_user   
+    return  trans.sort_values(by=['year', 'year_month','category'])
 
 def make_summary_table(trans):
 #    return trans.groupby([pd.Grouper(key='Category', freq='ME')])['amount'].sum()
@@ -76,20 +58,8 @@ def make_summary_table(trans):
 
 
 #trans = load_categorized_trans()
-authorized_user = {
-  "refresh_token": "1//03g2muAVysnQmCgYIARAAGAMSNgF-L9Ir-LtyKtenYOWuxu4X3-NeKgMSTCs3mYLaw2P0te051HxXy65z2TlHJVDiRa9BDCDB3Q",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "client_id": "290299696492-9au95o3qkeijg68cvb32cbdm59nvtqcp.apps.googleusercontent.com",
-  "client_secret": "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",
-  "scopes": [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive"
-  ],
-  "universe_domain": "googleapis.com",
-  "account": "",
-  "expiry": "2025-12-26T20:01:45Z"
-}
-trans, authorized_user = load_trans_from_gsheet(authorized_user)
+
+trans = load_trans_from_gsheet()
 summary = make_summary_table(trans)
 with ui.sidebar():
     ui.input_selectize("input_year", "Years", choices=("All Years","Date Range","2025","2024","2023"), selected="All Years")
