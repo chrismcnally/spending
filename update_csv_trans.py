@@ -14,7 +14,8 @@ from decimal import Decimal
 chris_cash_trans_payee = "6d265ca4-c546-42aa-8f0a-5aa7f4f5dda4"
 hella_cash_trans_payee = "842c01e5-6259-45ea-bf69-c623adb48132"
 
-
+amazon_off = True  # means we are not loading each amazon transaction, just going off YNAB already categorized, only for 2021 - 2023
+# for 2024 and beyond, using amazon files, we set this to false
 def find_unique_payees(transactions):
     payees = {}
     for trans in transactions.data.transactions:
@@ -102,11 +103,20 @@ def add_categories(transactions, categories):
     for trans in transactions: #payees.values:
         #print("looking for payee {} ; on {} ; {} ; by {} ".format( trans["desc"],trans["lance"],trans["amount"], trans["memo"]))
         #if not apply_special_dates(trans):
+        foundCat = False
         for cat in categories:
             for name_fragment in cat["payee_contains"]:
                 if name_fragment in trans["desc"]:
-                    trans["category"] = cat["name"]
-                    trans["fragment"] = name_fragment
+                    if (amazon_off and cat["name"] == amazon and trans["category"] is not None and len( trans["category"] ) > 1 and cat["name"] != trans["category"]):
+                        # don't override amazon we already categorized it in YNAB
+                        #  trans["category"] = cat["name"]
+                        trans["fragment"] = name_fragment
+                    else:
+                        if ( trans["category"] is not None and len( trans["category"] ) > 1 and cat["name"] != trans["category"]):
+                            print("overriding category " + trans["category"] + " with " + cat["name"] + " for " + trans["desc"]) 
+                        trans["category"] = cat["name"]
+                        trans["fragment"] = name_fragment
+                    foundCat = True
                     if "sub-category" in cat:
                         sub = cat["sub-category"]
                         if name_fragment in sub:
@@ -114,16 +124,17 @@ def add_categories(transactions, categories):
                             trans["subcat"] = sub[name_fragment]
                     if ("who" in cat):
                         trans["who"] = cat["who"]
-                    if (cat["name"]) == amazon:
+                    if (cat["name"] == amazon and not amazon_off):
                         trans["amount"] = Decimal(0.00)
                         trans["usd"] = Decimal(0.00)
                     update_category(name_fragment,cat,trans["amount"])
                     #print("applied category ",trans["category"])
                     break
-            if trans["category"] is not None and len(trans["category"]) > 1:
+            if foundCat:
                 break
-        if len(trans["category"]) < 1:
-            print("no category for payee {} ; on {} ; {} ; by {} ".format( trans["desc"],trans["lance"],trans["amount"], trans["memo"]))
+        # ynab files already have categories, so don't check len of category, not enough    
+        if len(trans["category"]) < 1 or not foundCat:
+            print("no category for desc {} ; on {} ; {} ; orig category {} ".format( trans["desc"],trans["lance"],trans["amount"], trans["category"]))
      
     return transactions
 
@@ -153,8 +164,8 @@ def load_csv_trans(infile):
 
 def write_updated_transactions(trans,outfile):
     trabs = sorted(trans, key=lambda x: (x['lance'], x['balance']))
-#    trans = trans.sort_values(by=["lance","balance","category"])
-    header = ["lance","dv","desc","amount","newt","balance","usd","erate","memo","category","subcat","fragment","who"]
+# orig    header = ["lance","dv","desc","amount","newt","balance","usd","erate","memo","category","subcat","fragment","who"]
+    header = ["lance","dv","desc","category","memo","amount","newt","balance","usd","erate","subcat","fragment","who"]
     with open(outfile, 'w', newline='') as csvfile:
        writer = csv.DictWriter(csvfile, fieldnames=header)
        writer.writeheader()
@@ -220,6 +231,7 @@ work = [
     "outfile": "/Users/cmcnally/Dropbox/python/textfiles/categorized-mil-2025.csv",
     "do_atm": True,
     "do_cats": True,
+    "process": False,
     "writeFile": True
   },
   {
@@ -227,6 +239,7 @@ work = [
     "outfile": "/Users/cmcnally/Dropbox/python/textfiles/categorized-mil-2024.csv",
     "do_atm": True,
     "do_cats": True,
+    "process": False,
     "writeFile": True
   },
   {
@@ -234,6 +247,7 @@ work = [
     "outfile": "/Users/cmcnally/Dropbox/python/textfiles/categorized-chase-2024-2025.csv",
     "do_atm": False,
     "do_cats": True,
+    "process": False,
     "writeFile": True
   },
   {
@@ -241,20 +255,40 @@ work = [
     "outfile": "/Users/cmcnally/Dropbox/python/textfiles/alread-done.csv",
     "do_cats": False,
     "do_atm": False,
+    "process": False,
     "writeFile": False
+  },
+    {
+    "infile": "/Users/cmcnally/Dropbox/python/textfiles/test_milen-2023.csv",
+    "outfile": "/Users/cmcnally/Dropbox/python/textfiles/test-milen-2023-categorized.csv",
+    "do_cats": True,
+    "do_atm": False,
+    "process": False,
+    "writeFile": True
+  },
+   {
+    "infile": "/Users/cmcnally/Dropbox/python/textfiles/test_chase-2023-2021.csv",
+    "outfile": "/Users/cmcnally/Dropbox/python/textfiles/test_chase-2023-2021-categorized.csv",
+    "do_cats": True,
+    "do_atm": False,
+    "process": True,
+    "writeFile": True
   }
+
+
 ]
 all_trans =[]        
 for w in work:
-    transactions = load_csv_trans(w["infile"])
-    if w["do_cats"]:
-        transactions = add_categories(transactions, category_list)
-    if w["do_atm"]:
-        deal_with_atm(transactions) #this adjusts hellas atms for clara
-    if w["writeFile"]:
-        write_updated_transactions(transactions,w["outfile"])
-    all_trans.extend(transactions)
+    if (w["process"]):
+        transactions = load_csv_trans(w["infile"])
+        if w["do_cats"]:
+            transactions = add_categories(transactions, category_list)
+        if w["do_atm"]:
+            deal_with_atm(transactions) #this adjusts hellas atms for clara
+        if w["writeFile"]:
+            write_updated_transactions(transactions,w["outfile"])
+        all_trans.extend(transactions)
 #update_categories_file(category_list)
 
 #do all of them
-write_updated_transactions(all_trans,"/Users/cmcnally/Dropbox/python/textfiles/categorized-all-2024-2025.csv")
+    write_updated_transactions(all_trans,"/Users/cmcnally/Dropbox/python/textfiles/categorized-all-2024-2025.csv")

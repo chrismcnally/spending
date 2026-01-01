@@ -14,6 +14,7 @@
       "RNE",
       "REDE NACIONAL EXPRES",
       "FLIXBUS.COM",
+      "Flix",
       "TRANSTEJO",
       "RODOVIARIA OESTE"
     ],
@@ -79,11 +80,13 @@
       "NOTARIAL",
       "COMISSAO TRF MBWA",
       "COMISSAO TRE MBWAY",
+      "IMPOSTO DE SELO",
       "IMPOSTO DO SELO",
       "IMPOSTO SELO",
       "Sportograf",
       "OVERSEAS PPT",
       "ANNUAL MEMBERSHIP FEE",
+      "Annual Membership Fee",
       "IMPOSTO DO SELO",
       "COMISSAO TRF MBWAY",
       "SUBSTITUICAO DE CARTAO"
@@ -343,10 +346,13 @@
       "LABETO",
       "POSTO RZ CALDAS",
       " OPTICAS",
+      "Opticas",
       "GRANDVISION",
+      "Discountglasses",
       "MEDIS",
       "Mario Albuquerque",
       "OARHEALTH",
+      "Oarrx.com",
       "Allday",
       "ALMAGEMEDICAL",
       "CALDAS GLOBALTHERAPYCAL",
@@ -381,10 +387,13 @@
     },
     "sub-category": {
       " OPTICAS": "Glasses/Contacts",
+      "Discountglasses": "Glasses/Contacts",
       "GRANDVISION": "Glasses/Contacts",
       "NSTITITO MICROC": "Glasses/Contacts",
+      "Opticas": "Glasses/Contacts",
       "FARMACIA": "Pharmacy",
       "OARHEALTH": "Pharmacy",
+      "Oarrx.com": "Pharmacy",
       "Allday": "Pharmacy",
       "IHERB": "Pharmacy",
       "JCLAC POSTO BLC": "Blood Tests",
@@ -538,6 +547,7 @@
       "SAFFLOR",
       "167825390832809",
       "Green Love Restauran",
+      "MOMENTOS NO BASTIDORFIG",
       "CAMAROEIRO REAL",
       "LEITAO DA MEALHADA",
       "DONA BRANCA",
@@ -674,7 +684,6 @@
       "COGNITIVEMETRICS",
       "RUNKD.IT 0-55EC-4EF1-803D",
       "ALL RUN",
-      "Patreon",
       "RUNKD",
       "UNRWAUSA.ORG",
       "Deporvillage",
@@ -691,7 +700,6 @@
       "UNRWAUSA.ORG": 2,
       "ALL RUN": 1,
       "SPDAD - Sociedade Portugu": 11,
-      "Patreon": 10,
       "Strava Ireland Limited": 2,
       "Deporvillage": 2,
       "TRAININGPEAKS": 1,
@@ -782,7 +790,8 @@
       "IGKOU REPOUSI ANNA KERAMEIKOY",
       "OASA ETICKET",
       "DUTY FREE SPATON",
-      "SIX THOUSAND ISLANDS"
+      "SIX THOUSAND ISLANDS",
+      "Papaki"
     ],
     "weight": 5,
     "fragment_weights": {
@@ -939,7 +948,8 @@
       "TRE MB WAY P/ ***#*4493": "IRIS",
       "*##4493": "IRIS",
       "****4493": "IRIS",
-      "MB WAY P/ *****4493": "IRIS"
+      "MB WAY P/ *****4493": "IRIS",
+      "Ordem Pagamento s/Estrangeiro": "Greek"
     },
     "payee_contains": [
       "MB WAY P/ *****9821",
@@ -1007,6 +1017,8 @@
       "DINO PARQUE",
       "GRUTAS",
       "GELATOMANIA",
+      "Lawrence Hall Sci",
+      "Liberty Science",
       "ROBLOX.COM",
       "GELATARIA",
       "VILA NATAL",
@@ -1019,6 +1031,7 @@
       "PAVILHAO CONHLIS",
       "PARQUES DE SINTRA",
       "Splash",
+      "Slidesplash",
       "BOL QUEIJAS",
       "IGESPAR MOSTEIRO",
       "JARDIM MONTE PALACE",
@@ -1082,6 +1095,7 @@
       "PONTA DELGADA",
       "46827/086126624",
       "VIKING",
+      "Pestana Viking",
       "GERES",
       "EcoBeach",
       "TAP AIR     000001251641",
@@ -1113,6 +1127,7 @@
       "AIRBNB * HMEQFB3QKE",
       "TAP AIRLINE 0470010421404",
       "BKG*HOTEL",
+      "JetBlue",
       "TAP AIRLINE 0474207049847",
       "ET CAR HIRE"
     ],
@@ -1165,7 +1180,9 @@
     "payee_contains": [
       "BERTRAND",
       "Kindle",
+      "Libro Audiobooks",
       "FNAC.PT",
+      "Porto Editora",
       "FNAC",
       "ITCH.IO",
       "LIVRARIA",
@@ -1215,7 +1232,6 @@
     "payee_contains": [
       "ATELIER DO DOCE",
       "PIZZARIA SAO MARTINHS",
-      "MUJI",
       "COMERCIO ARTIGO",
       "JOAO SERRENHO LDA",
       "ATELIER DO DOCE",
@@ -1311,6 +1327,7 @@
       "KID TO KID",
       "GUIMARAES",
       "BBL C RAINHA",
+      "BBL CALDAS",
       "LEFTIES"
     ],
     "weight": 42,
@@ -1433,6 +1450,7 @@
       "OSLO",
       "UNIQLO",
       "NIKE",
+      "MUJI",
       "MUJI CHIADO Lisbon",
       "HM PT0301 Lisboa PT"
     ],
@@ -1461,6 +1479,7 @@
       "MACMILLAN CANCER",
       "CHUFFED.OR",
       "ACT*time to",
+      "Patreon",
       "GoFundMe",
       "GOFNDME",
       "DONORSCHOOSE"
@@ -1606,21 +1625,25 @@
     "group_name": "Second Tier Expenses: Luxuries and Lifestyle",
     "sub-category": {
       "hbomax.com": "HBO Max",
+      "Max.com": "HBO Max",
       "help.max.com": "HBO Max",
       "HELP.HBOMAX.COM": "HBO Max",
       "NETFLIX.COM": "Netflix",
+      "Netflix": "Netflix",
       "Netflix.com": "Netflix"
     },
     "payee_contains": [
       "MEDIOESTE",
       "hbomax.com",
       "help.max.com",
+      "Max.com",
       "HELP.HBOMAX.COM",
       "Disney",
       "NYTimes",
       "HELP.MAX.COM",
       "GOOGLE *TV",
       "NETFLIX.COM",
+      "Netflix",
       "CHATGPT",
       "404 MEDIA",
       "HBO Nordic",
@@ -1656,6 +1679,7 @@
       "SUNNY",
       "WWW.DJI.COM",
       "DROPBOX",
+      "Dropbox",
       "Pobox",
       "iRepair AE GLYFADA GR",
       "FASTMAIL",
@@ -1692,7 +1716,8 @@
     "group_id": "850bc6c5-c687-47a1-98a2-2d658d650e38",
     "group_name": "Second Tier Expenses: Luxuries and Lifestyle",
     "payee_contains": [
-      "UBER"
+      "UBER",
+      "TAXIS ARISTIDES"
     ],
     "weight": 11,
     "fragment_weights": {
@@ -1713,6 +1738,7 @@
       "TURTLECHAPTER",
       "VASILOPOULOS",
       "ATTRATTIVO_ERMOU",
+      "Freenow Raauz",
       "KOSTARELOU",
       "VIVLIOPOLIO",
       "SPATA GR",
@@ -1725,6 +1751,7 @@
       "BOLT.EUO2503122331",
       "SWEETIES",
       "AEGEAN",
+      "Aegean",
       "YESIM",
       "FERRYHOPPER",
       "EVERYPAY*SKROUTZ",
@@ -1839,6 +1866,8 @@
     "payee_contains": [
       "LEV ATM 6519",
       "LEV ATM 2860",
+      "LEV ATM 7455",
+      "Transfer : Chris's Cash",
       "Atm 6519",
       "ATM 6519",
       "ATM 7455"
@@ -1893,8 +1922,10 @@
     "group_name": "Second Tier Expenses: Luxuries and Lifestyle",
     "payee_contains": [
       "LEV ATM 0885",
+      "LEV ATM 6253",
       "ATM 0885",
       "Lev ATw 0885",
+      "Transfer : Hella's Cash",
       "ATM 9496"
     ],
     "weight": 51,

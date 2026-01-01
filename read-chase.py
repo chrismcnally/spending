@@ -43,6 +43,7 @@ def add_usd_other_fields(dataf):
     return dataf
 
 def add_euro_other_fields(dataf):
+    # for the US amazon the amount field is usd, copy it into the usd field
     dataf['usd'] = dataf.amount.apply(lambda x :round( Decimal(x),2)*Decimal(-1.0)) # make amount a decimal instead of float and negative
     dataf["balance"] = 0
     dataf["erate"] = Decimal(0)
@@ -66,8 +67,8 @@ def add_euro_other_fields(dataf):
 
     return dataf
 
-monthly_ex_rates = {   
 #1 euro is (e to u) 1 dollar is (u to e)
+monthly_ex_rates = {   
 "202401" :	(1.091126, 0.916507 ),
 "202402" :	(1.079318, 0.926522 ),
 "202403" : 	(1.087005, 0.919976 ),

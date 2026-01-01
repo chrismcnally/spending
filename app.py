@@ -25,6 +25,8 @@ def load_categorized_trans():
 #    testdates = [x[0:4] + "-" +  x[5:7] + "-01" for x in all_dates]  
     trans["year"] = years
     trans["year_month"] = year_months
+    trans["amount"]  = pd.to_numeric(trans["amount"] , errors='coerce')
+    trans["amount"] = trans["amount"].astype(float)
     trans['amount'] = trans['amount'].apply(lambda x: Decimal(x).quantize(Decimal("0.01"),rounding=ROUND_HALF_UP) )
 
    # trans['amount'] = trans['amount'].astype(float)
@@ -39,7 +41,11 @@ def load_trans_from_gsheet():
     worksheet =  sh.get_worksheet(0)
     trans = pd.DataFrame(worksheet.get_all_records())
     trans = trans.loc[trans["newt"].isin(["D", "C"])] # we currently have D, C, P, and F
+
+    # this won't work anymore, unless we replace empty string with None
+    trans["category"] = trans["category"].apply(lambda x: None if x == "" else x)
     trans['category'] = trans['category'].fillna("Unknown") # mark the unknown category
+
     trans.sort_values(by=["lance","dv","balance"], ascending=[True, True, False], inplace=True)
     trans.drop(columns=["balance","dv","erate","fragment","who"], inplace=True)
     all_dates = trans["lance"] #gather all dates. this is a list of the values in that column
@@ -48,6 +54,8 @@ def load_trans_from_gsheet():
 #    testdates = [x[0:4] + "-" +  x[5:7] + "-01" for x in all_dates]  
     trans["year"] = years
     trans["year_month"] = year_months
+    trans["amount"]  = pd.to_numeric(trans["amount"] , errors='coerce')
+    trans["amount"] = trans["amount"].astype(float)
     trans['amount'] = trans['amount'].apply(lambda x: Decimal(x).quantize(Decimal("0.01"),rounding=ROUND_HALF_UP) )
     return  trans.sort_values(by=['year', 'year_month','category'])
 
@@ -62,7 +70,7 @@ def make_summary_table(trans):
 trans = load_trans_from_gsheet()
 summary = make_summary_table(trans)
 with ui.sidebar():
-    ui.input_selectize("input_year", "Years", choices=("All Years","Date Range","2025","2024","2023"), selected="All Years")
+    ui.input_selectize("input_year", "Years", choices=("All Years","Date Range","2025","2024","2023","2022","2021"), selected="All Years")
 #    ui.input_date_range("inDateRange", "Input date", start="2024-11-01", end="2025-11-30")
     ui.input_radio_buttons("months_or_years","Summarize by:",["Year","Month"],selected = ["Year"])
     ui.input_radio_buttons("sort_by","Sort by:",["amount","Date","category"],selected = ["amount"])
@@ -174,6 +182,7 @@ def get_pie_data():
         data = get_trans().query(qstr1).copy()
         total = data.amount.sum()
         title = f"{title} €{total:,.0f}" #{:,.0f}
+        # gsheet has empty string instead of null or None, fix to None
         data["subcat"] = data["subcat"].apply(lambda x: None if x == "" else x)
         data['subcat'] = data.subcat.combine_first(data.desc)# when subcat is null, replace with desc
         data = data.groupby('subcat')['amount'].sum().reset_index()
