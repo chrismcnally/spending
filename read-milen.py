@@ -15,6 +15,10 @@ def readMil(filename):
     # when your UI is in English, and you downloaad a file, it's UTF-8 and Debit, Credit
     # when your UI is Portuguese, you get UTF-16-be and Débito and Crédito with accents
     pathf = PATH_F + filename
+    if (filename in ["Portugues-bank-2023-11.csv","Portugues-bank-2023-12.csv"]):
+        return pd.read_csv(pathf, delimiter=";", engine='python', skiprows=13, skipfooter=1,header=None,
+        names=["lance","dv","desc","amount","type","balance"], parse_dates=['dv','lance'], encoding="utf_16_le",dayfirst=True)
+
     if filename == "AUG-2021-2.csv" or filename == "SEPT-2021-2.csv" or filename == "JULY-2021-2.csv":
         return pd.read_csv(pathf, delimiter=";", engine='python',header=None,
         names=["lance","dv","desc","amount","type","balance"],   parse_dates=['dv','lance'], dayfirst=True) 
@@ -28,10 +32,10 @@ def readPdfExtract(filename):
         names=["lance","dv","desc","amount","type","balance","junk"],   parse_dates=['dv','lance'], dayfirst=False) 
 
 def initOtherColumns(dataf):
-    dataf["usd"] = Decimal(0)
-    dataf["erate"] = Decimal(0)
+    dataf["usd"] = 0.0
+    dataf["erate"] = 0.0
     dataf["memo"] = ""
-    dataf['amount'] = dataf.amount.apply(lambda x :round( Decimal(x),2)) # make amount a decimal instead of float
+   # dataf['amount'] = dataf.amount.apply(lambda x :round( Decimal(x),2)) # make amount a decimal instead of float
     dataf["category"] = ""
     dataf["subcat"] = ""
     dataf["fragment"] = ""
@@ -76,6 +80,32 @@ def process_2025(fileName = None):
 #   dataf.loc[dataf["desc"].str.contains("Ord.Pgt.do Estrg./SCH REF(Y 1 0000077134801)", case=False, na=False),"newt"] = "P"
     header = ["lance","dv","desc","amount","newt","balance","usd","erate","memo","category","subcat","fragment","who"]
     outfile = f'{PATH_F}uncategorized-mil-{fileName or "2025"}.csv'  
+    dataf.to_csv(outfile, index=False,encoding="ascii", columns=header,date_format='%Y-%m-%d')
+#    dataf.to_csv("/Users/cmcnally/Dropbox/python/textfiles/uncategorized-mil-2025.csv", index=False,encoding="ascii", columns=header,date_format='%Y%m%d')
+
+def process_ancillary(fileNames = None,suffix=""):
+    # 2025 data files code is below
+    dataf = pd.concat(map(readMil,fileNames),axis = 0, ignore_index=True)
+    dataf = dataf.sort_values(by=['lance', 'balance'], ascending=[True,False])
+    #print(dataf.sort_values(by=["lance","dv"]).head(10))
+    # add extra columns for the rate and usd
+    dataf = initOtherColumns(dataf)
+    exch_rate = 1.171123377 #1.1059 was 2023-12 this one is now sept 2025 last deposit (including fees 10K DOWN TO 8.5k)
+    dataf["erate"] = exch_rate
+    dataf["usd"] = dataf["amount"]
+    dataf.usd *= exch_rate
+    dataf['memo'] = dataf.amount.apply(lambda x : "{:.2f} euros at {:.4f}".format(x,exch_rate)) # make amount a decimal instead of float
+#    memo = "{:.2f} euros at {:.4f}".format(x,exch_rate)
+
+    # convert Debito to D (in a new column newt)
+    dataf.loc[dataf.type == "Debit",'newt'] = "D"
+    dataf.loc[dataf.type == "Credit",'newt'] = "C"
+    # fix transferwise here now to Payment
+    dataf.loc[dataf["desc"].str.contains("Wise", case=True, na=False),"newt"] = "P"
+# this does not work because it thinks its a regexp with the (), so do it manually in the csv file (isnt there a way to say noregxp?)
+#   dataf.loc[dataf["desc"].str.contains("Ord.Pgt.do Estrg./SCH REF(Y 1 0000077134801)", case=False, na=False),"newt"] = "P"
+    header = ["lance","dv","desc","amount","newt","balance","usd","erate","memo","category","subcat","fragment","who"]
+    outfile = f'{PATH_F}uncategorized-mil-ancillar{suffix}.csv'  
     dataf.to_csv(outfile, index=False,encoding="ascii", columns=header,date_format='%Y-%m-%d')
 #    dataf.to_csv("/Users/cmcnally/Dropbox/python/textfiles/uncategorized-mil-2025.csv", index=False,encoding="ascii", columns=header,date_format='%Y%m%d')
 
@@ -241,6 +271,9 @@ files_2025 = (
 
 #process_2024()
 
-process_2025()
+#process_2025()
 
 #process_2023()
+
+#process_ancillary( ["Portugues-bank-2023-11.csv","Portugues-bank-2023-12.csv"],"-2023-11-12")
+process_ancillary( ["Portugues-bank-2025-12-anc.csv"],"-2025-12")

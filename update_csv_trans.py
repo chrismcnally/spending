@@ -271,9 +271,27 @@ work = [
     "outfile": "/Users/cmcnally/Dropbox/python/textfiles/test_chase-2023-2021-categorized.csv",
     "do_cats": True,
     "do_atm": False,
+    "process": False,
+    "writeFile": True
+  },
+     {
+    "infile": "/Users/cmcnally/Dropbox/python/textfiles/test_ally-bank-2023-2021.csv",
+    "outfile": "/Users/cmcnally/Dropbox/python/textfiles/test_ally-bank-2023-2021-categorized.csv",
+    "do_cats": True,
+    "do_atm": False,
+    "process": False,
+    "writeFile": True
+  },
+    {
+    "infile": "/Users/cmcnally/Dropbox/python/textfiles/uncategorized-ancillary-mixed.csv",
+    "outfile": "/Users/cmcnally/Dropbox/python/textfiles/categorized-ancillary-mixed.csv",
+    "do_atm": False,
+    "do_cats": True,
     "process": True,
     "writeFile": True
-  }
+  },
+
+
 
 
 ]
@@ -291,4 +309,4 @@ for w in work:
 #update_categories_file(category_list)
 
 #do all of them
-    write_updated_transactions(all_trans,"/Users/cmcnally/Dropbox/python/textfiles/categorized-all-2024-2025.csv")
+   # write_updated_transactions(all_trans,"/Users/cmcnally/Dropbox/python/textfiles/categorized-all-2024-2025.csv")
