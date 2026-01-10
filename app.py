@@ -15,7 +15,7 @@ S_KEY = "1ai9nZYCNw5g5-fv0-siPryHWYwl7hSfTunq5wswYfDo"
 def load_categorized_trans():
     #trans =  pd.read_csv("textfiles/categorized-all-2024-2025.csv")
     trans = pd.read_csv("https://raw.githubusercontent.com/chrismcnally/spending/refs/heads/master/textfiles/categorized-all-2024-2025.csv")
-    trans = trans.loc[trans["newt"].isin(["D", "C"])] # we currently have D, C, P, and F
+    #trans = trans.loc[trans["newt"].isin(["D", "C"])] # we currently have D, C, P, I and F? 
     trans['category'] = trans['category'].fillna("Unknown") # mark the unknown category
     trans.sort_values(by=["lance","dv","balance"], ascending=[True, True, False], inplace=True)
     trans.drop(columns=["balance","dv","erate","fragment","who"], inplace=True)
@@ -40,7 +40,7 @@ def load_trans_from_gsheet():
     sh = gc.open_by_key(S_KEY)
     worksheet =  sh.get_worksheet(0)
     trans = pd.DataFrame(worksheet.get_all_records())
-    trans = trans.loc[trans["newt"].isin(["D", "C"])] # we currently have D, C, P, and F
+#    trans = trans.loc[trans["newt"].isin(["D", "C"])] # we currently have D, C, P, T and F? MAYBE I for income
 
     # this won't work anymore, unless we replace empty string with None
     trans["category"] = trans["category"].apply(lambda x: None if x == "" else x)
@@ -71,6 +71,8 @@ trans = load_trans_from_gsheet()
 summary = make_summary_table(trans)
 with ui.sidebar():
     ui.input_selectize("input_year", "Years", choices=("All Years","Date Range","2025","2024","2023","2022","2021"), selected="All Years")
+    ttypes = {"'D'":"Debit","'C'":"Credit","'T'":"Transfers","'P'":"Credit Card Payments","'I'":"Income"}
+    ui.input_checkbox_group("types","Transaction Types",choices=ttypes,selected=(["'D'","'C'"]))
 #    ui.input_date_range("inDateRange", "Input date", start="2024-11-01", end="2025-11-30")
     ui.input_radio_buttons("months_or_years","Summarize by:",["Year","Month"],selected = ["Year"])
     ui.input_radio_buttons("sort_by","Sort by:",["amount","Date","category"],selected = ["amount"])
@@ -114,6 +116,7 @@ with ui.layout_columns(col_widths=[5,7,12]):
 @reactive.calc
 def filtered_df():
     # When a summary rows is selected use it as a filter, otherwise, render the detail rows normally 
+    # this should respect the filters in the sidebar too (eh not sure)
     data_selected = summary_df.data_view(selected=True)
     if ( data_selected.empty):
         trans = get_trans()
@@ -136,6 +139,18 @@ def filtered_df():
         return get_trans().query(qstr1)
     
 @reactive.calc
+def buildFilter():
+    qstr = None
+    types = input.types()
+    # ["D","C"] is default
+    if types:
+        llist = ",".join(types)
+        qstr = f"newt in [ {llist} ]"
+    else:
+        qstr = "newt in ['D']"
+    return qstr
+
+@reactive.calc
 def get_pie_data():
     data_selected = summary_df.data_view(selected=True)
     if ( data_selected.empty):
@@ -146,9 +161,15 @@ def get_pie_data():
         else:
             qstr = "year == '" + input.input_year() + "'"
             title = "Year " + input.input_year() 
+        types = buildFilter()    
         if qstr == "":
-            summary = get_trans().copy()
+            if (types is not None):
+                qstr = types    
+                summary = get_trans().query(qstr).copy()
+            else:
+                summary = get_trans().copy()
         else:
+            qstr += " and " + types
             summary = get_trans().query(qstr).copy()
 
         summary = summary.groupby(['category'])['amount'].sum().reset_index()
@@ -178,6 +199,8 @@ def get_pie_data():
             year = data_selected["year"].to_numpy()[0]
             qstr1 = f"category ==  '{category}' and year == '{year}'"
             title = f"{title} and {year}"
+        types = buildFilter()    
+        qstr1 += " and " + types
         # Filter data for selected category and dates
         data = get_trans().query(qstr1).copy()
         total = data.amount.sum()

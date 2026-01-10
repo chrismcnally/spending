@@ -47,8 +47,8 @@ def initOtherColumns(dataf):
 def fix_credits(dataf):
     # transfers are not credits in our final analysis, we need to change them to P for payments, or T for transfer, but
     # we used P in chase so P is fine
-    dataf.loc[dataf["desc"].str.contains("transferwise", case=False, na=False),"newt",] = "P"
-    dataf.loc[dataf["desc"].str.contains("EMILY HELLA TSACONAS", case=True, na=False),"newt",] = "P"
+    dataf.loc[dataf["desc"].str.contains("transferwise", case=False, na=False),"newt",] = "T"
+    dataf.loc[dataf["desc"].str.contains("EMILY HELLA TSACONAS", case=True, na=False),"newt",] = "T"
     # this one too "Wise" and "Ord.Pgt.do Estrg"
 
 def process_2024():
@@ -269,7 +269,7 @@ files_2025 = (
 "Portugues-bank-2025-11.csv","Portugues-bank-2025-12.csv")
 
 
-#process_2024()
+process_2024()
 
 #process_2025()
 

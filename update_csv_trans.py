@@ -120,7 +120,7 @@ def add_categories(transactions, categories):
                     if "sub-category" in cat:
                         sub = cat["sub-category"]
                         if name_fragment in sub:
-                            trans["memo"] = sub[name_fragment]
+#                            trans["memo"] = sub[name_fragment]
                             trans["subcat"] = sub[name_fragment]
                     if ("who" in cat):
                         trans["who"] = cat["who"]
@@ -282,18 +282,23 @@ work = [
     "process": False,
     "writeFile": True
   },
+  # ancillary were  the end of 12/2025 and 11 and 12 from 2023 which I found, all from Millenium
     {
     "infile": "/Users/cmcnally/Dropbox/python/textfiles/uncategorized-ancillary-mixed.csv",
     "outfile": "/Users/cmcnally/Dropbox/python/textfiles/categorized-ancillary-mixed.csv",
     "do_atm": False,
     "do_cats": True,
-    "process": True,
+    "process": False,
     "writeFile": True
   },
-
-
-
-
+   {
+    "infile": "/Users/cmcnally/Dropbox/python/textfiles/converted_FIXED-milen-2024.csv",
+    "outfile": "/Users/cmcnally/Dropbox/python/textfiles/categorized-converted_FIXED-milen-2024.csv",
+    "do_atm": False,
+    "do_cats": True,
+    "process": True,
+    "writeFile": True
+  }
 ]
 all_trans =[]        
 for w in work:
