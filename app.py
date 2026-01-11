@@ -229,22 +229,20 @@ def get_summary():
     sum_by = input.months_or_years()
     sort = input.sort_by()
     asc = True
+    qstr  = buildFilter()
+    if (year != "All Years"):
+        qstr += "and year == '" + year  + "'"
+
     if (sum_by == "Month"):
         if (sort =="Date"):
             sort = "year_month"
-        summary = trans.groupby(['category','year', 'year_month'])['amount'].sum().reset_index()
+        summary = trans.query(qstr).groupby(['category','year', 'year_month'])['amount'].sum().reset_index()
     else:   
         if (sort =="Date"):
             sort = "year"
-        summary = trans.groupby(['category','year'])['amount'].sum().reset_index()
+        summary = trans.query(qstr).groupby(['category','year'])['amount'].sum().reset_index()
     summary = summary.sort_values(by=[sort,"category"],ascending=asc)
-    if (year == "All Years"):
-        return summary.round({'amount': 2, 'usd': 2})
-    else: #user chose a single year to filter by
-        qstr = "year == '" + year  + "'"
-        summary = summary.query(qstr)
-#        output_file(summary,year)
-        return summary.round({'amount': 2, 'usd': 2})
+    return summary.round({'amount': 2, 'usd': 2})
     
 #def output_file(sumt,year):
    #  sumt.to_csv("/Users/cmcnally/Dropbox/python/textfiles/sorted" + year + ".csv", index=False)
