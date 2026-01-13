@@ -291,7 +291,7 @@ work = [
     "process": False,
     "writeFile": True
   },
-   {
+   { # these were transactions from 2024 milenium pdf reads that were skipped by the pdf reader
     "infile": "/Users/cmcnally/Dropbox/python/textfiles/converted_FIXED-milen-2024.csv",
     "outfile": "/Users/cmcnally/Dropbox/python/textfiles/categorized-converted_FIXED-milen-2024.csv",
     "do_atm": False,

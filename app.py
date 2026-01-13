@@ -9,7 +9,13 @@ import os
 import json
 
 S_KEY = "1ai9nZYCNw5g5-fv0-siPryHWYwl7hSfTunq5wswYfDo"
-
+PK_COL = 9
+SUB_COL = 8
+MEMO_COL = 4
+MEMO_UPDATE = 6
+SUB_UPDATE = 12
+PK_UPDATE = 15
+worksheet = None
 
 # old code to load from the file, using a spreadsheet now
 def load_categorized_trans():
@@ -110,8 +116,34 @@ with ui.layout_columns(col_widths=[5,7,12]):
         @render.data_frame
         def transactions_df():
 #            load_trans_from_gsheet()
-            return render.DataGrid(filtered_df(), filters=True)  
-    
+            return render.DataGrid(filtered_df(), filters=True, editable=True)  
+
+@transactions_df.set_patch_fn
+def _(*, patch: render.CellPatch):
+        update_data_with_patch(patch)
+        return patch["value"]    
+
+def update_data_with_patch(patch):
+    df_copy = transactions_df.data_view()
+    col_to_update = int(patch["column_index"])
+    pk_ = int(df_copy.iat[patch["row_index"],PK_COL] )
+#    for i in range(0,10):
+#        print(f' row col  {i} {df_copy.iat[patch["row_index"],i]} ') 
+#    print(f"updateing pk {pk_} by changing row {patch["row_index"]} column {patch["column_index"]} to new value {patch["value"]}")
+    df_copy.iat[patch["row_index"], patch["column_index"]] = patch["value"]
+    if (col_to_update == SUB_COL or col_to_update == MEMO_COL ):
+        credentials =  json.loads(os.environ["SERVICE_JSON"])
+        gc = gspread.service_account_from_dict(credentials)
+        sh = gc.open_by_key(S_KEY)
+        worksheet =  sh.get_worksheet(0)
+        w_pk = worksheet.cell(pk_, PK_UPDATE).value
+#        print(f"Updating row with pk {w_pk}")
+#        worksheet.update_cell(1, 16, 'Bingo!')
+        if (col_to_update == SUB_COL ):
+            worksheet.update_cell(pk_, SUB_UPDATE,  patch["value"])
+        else:
+            worksheet.update_cell(pk_, MEMO_UPDATE,  patch["value"])
+
 
 @reactive.calc
 def filtered_df():
@@ -241,7 +273,7 @@ def get_summary():
         if (sort =="Date"):
             sort = "year"
         summary = trans.query(qstr).groupby(['category','year'])['amount'].sum().reset_index()
-    summary = summary.sort_values(by=[sort,"category"],ascending=asc)
+    summary = summary.sort_values(by=[sort,"year","category"],ascending=asc)
     return summary.round({'amount': 2, 'usd': 2})
     
 #def output_file(sumt,year):
