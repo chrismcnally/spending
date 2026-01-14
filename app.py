@@ -92,7 +92,6 @@ def load_categorized_trans():
    # trans['amount'] = trans['amount'].astype(float)
  
     return  trans.sort_values(by=['year', 'year_month','category'])   
-
 def load_trans_from_gsheet():
     # json.loads(os.environ["GSPREAD_CREDS_JSON"])
     credentials =  json.loads(os.environ["SERVICE_JSON"])
@@ -121,16 +120,17 @@ def load_trans_from_gsheet():
     trans['amount'] = trans['amount'].apply(lambda x: Decimal(x).quantize(Decimal("0.01"),rounding=ROUND_HALF_UP) )
     return  trans.sort_values(by=['year', 'year_month','category'])
 
-def make_summary_table(trans):
+def make_summary_table(detail):
 #    return trans.groupby([pd.Grouper(key='Category', freq='ME')])['amount'].sum()
-    summary = trans.groupby(['category','year', 'year_month'])['amount'].sum()
+    summary = detail.groupby(['category','year', 'year_month'])['amount'].sum()
     return summary.reset_index()
 
 
 #trans = load_categorized_trans()
 
-trans = load_trans_from_gsheet()
-summary = make_summary_table(trans)
+details = load_trans_from_gsheet()
+trans = reactive.Value(details)
+summary = make_summary_table(details)
 with ui.sidebar():
     ui.input_selectize("input_year", "Years", choices=("All Years","Date Range","2025","2024","2023","2022","2021"), selected="All Years")
     ttypes = {"'D'":"Debit","'C'":"Credit","'T'":"Transfers","'P'":"Credit Card Payments","'I'":"Income"}
@@ -174,6 +174,13 @@ with ui.layout_columns(col_widths=[5,7,12]):
         def transactions_df():
             df = filtered_df()
             return render.DataGrid(df, filters=True, selection_mode="row")  
+        
+    with ui.card():
+        ui.card_header("Filtered Totals")
+        @render.text
+        def do_totals():
+            totals = calc_filtered_sum()
+            return f'{totals["count"]} filtered rows. Total Euros {totals["euros"]:,.2f} Total dollars {totals["usd"]:,.2f}'
 
 @transactions_df.set_patch_fn
 def _(*, patch: render.CellPatch):
@@ -187,21 +194,19 @@ def update_data_with_patch():
     ed_sub = input.edit_sub()
     ed_memo = input.edit_memo()
     ed_desc = input.edit_desc()
-    df_copy = transactions_df.data_view()
-    orig_sub = trans.loc[trans["PK"] == int(pk_)]["subcat"].to_numpy()[0]
-    orig_memo = trans.loc[trans["PK"] == int(pk_),"memo"].to_numpy()[0] 
-    orig_cat = trans.loc[trans["PK"] == int(pk_)]["category"].to_numpy()[0]
+   # df_copy = transactions_df.data_view()
+    new_trans = get_trans().copy()
+    orig_sub = new_trans.loc[new_trans["PK"] == int(pk_)]["subcat"].to_numpy()[0]
+    orig_memo = new_trans.loc[new_trans["PK"] == int(pk_),"memo"].to_numpy()[0] 
+    orig_cat = new_trans.loc[new_trans["PK"] == int(pk_)]["category"].to_numpy()[0]
 
-    df_copy.loc[df_copy["PK"] == int(pk_),"subcat"] = ed_sub
-    df_copy.loc[df_copy["PK"] == int(pk_),"memo"] = ed_memo
-    df_copy.loc[df_copy["PK"] == int(pk_),"category"] = ed_cat
-    trans.loc[trans["PK"] == int(pk_),"subcat"] = ed_sub
-    trans.loc[trans["PK"] == int(pk_),"memo"] = ed_memo
-    trans.loc[trans["PK"] == int(pk_),"category"] = ed_cat
-#    for i in range(0,10):
-#        print(f' row {patch["row_index"]} col  {i} {df_copy.iat[patch["row_index"],i]} ') 
-#    print(f"updateing pk {pk_} by changing row {patch["row_id"]} column {patch["column_index"]} to new value {patch["value"]}")
-#    df_copy.iat[patch["row_index"], patch["column_index"]] = patch["value"]
+ #   df_copy.loc[df_copy["PK"] == int(pk_),"subcat"] = ed_sub
+ #   df_copy.loc[df_copy["PK"] == int(pk_),"memo"] = ed_memo
+ #   df_copy.loc[df_copy["PK"] == int(pk_),"category"] = ed_cat
+    new_trans.loc[new_trans["PK"] == int(pk_),"subcat"] = ed_sub
+    new_trans.loc[new_trans["PK"] == int(pk_),"memo"] = ed_memo
+    new_trans.loc[new_trans["PK"] == int(pk_),"category"] = ed_cat
+    trans.set(new_trans)
     credentials =  json.loads(os.environ["SERVICE_JSON"])
     gc = gspread.service_account_from_dict(credentials)
     sh = gc.open_by_key(S_KEY)
@@ -214,6 +219,22 @@ def update_data_with_patch():
     if (orig_cat != ed_cat ):
         worksheet.update_cell(int(pk_), CAT_UPDATE,  ed_cat)
 
+@reactive.calc
+def calc_filtered_sum():
+    view = transactions_df.data_view()
+
+    if view is None or view.empty:
+        return {
+            "count": 0,
+            "euros": 0.0,
+            "usd" : 0.0
+        }
+
+    return {
+        "count": len(view),
+        "euros": view["amount"].sum(),
+        "usd" : view["usd"].sum()
+    }
 
 @reactive.calc
 def filtered_df():
@@ -338,11 +359,11 @@ def get_summary():
     if (sum_by == "Month"):
         if (sort =="Date"):
             sort = "year_month"
-        summary = trans.query(qstr).groupby(['category','year', 'year_month'])['amount'].sum().reset_index()
+        summary = get_trans().query(qstr).groupby(['category','year', 'year_month'])['amount'].sum().reset_index()
     else:   
         if (sort =="Date"):
             sort = "year"
-        summary = trans.query(qstr).groupby(['category','year'])['amount'].sum().reset_index()
+        summary = get_trans().query(qstr).groupby(['category','year'])['amount'].sum().reset_index()
     summary = summary.sort_values(by=[sort,"year","category"],ascending=asc)
     return summary.round({'amount': 2, 'usd': 2})
     
@@ -402,4 +423,4 @@ def get_trans():
    # dates = input.inDateRange()
    # qstr = "lance >= '" + dates[0].isoformat() + "' and lance <= '" + dates[1].isoformat() + "'"
    # return trans.query(qstr).round({'amount': 2, 'usd': 2})
-     return trans.round({'amount': 2, 'usd': 2})
+     return trans.get().round({'amount': 2, 'usd': 2})
