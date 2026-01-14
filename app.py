@@ -12,10 +12,64 @@ S_KEY = "1ai9nZYCNw5g5-fv0-siPryHWYwl7hSfTunq5wswYfDo"
 PK_COL = 9
 SUB_COL = 8
 MEMO_COL = 4
+CAT_UPDATE = 5
 MEMO_UPDATE = 6
 SUB_UPDATE = 12
 PK_UPDATE = 15
-worksheet = None
+
+categories = ["Amazon -- already categorized individulally",
+"Bicycle Maintenance",
+"Birthdays, Christmas, Gifts, Parties",
+"Books, mostly hella",
+"Caldas home wares etc",
+"Car/Gas/Tolls/Parking/repair",
+"Charity/Activist Contributions",
+"Children's Enrichment Classes",
+"Chris Cash Spending",
+"Chris Clothing, Shoes, & Accessories",
+"Chris Hobbies",
+"Chris Travel",
+"Chris's Lunches/Fast Food",
+"CORREOS_EXPRESS(63964410554091701999998)",
+"Dental",
+"Electric",
+"Family Entertainment",
+"Family Vacations",
+"Fitness & Health Hacking",
+"Fraud",
+"GADGETS",
+"Google Fi + Cell phone",
+"Groceries",
+"Health Insurance Premiums",
+"Hella Cash Spending",
+"Hella Clothing, Shoes, Accessories",
+"Hella Travel",
+"Hella's Hobbies and Sports",
+"Hella's Lunches/Fast Food",
+"Hella's yarn and crafts",
+"Hellas Podcast",
+"House Cleaning",
+"Income Taxes",
+"Kids Clothing and Baby Gear",
+"Legal & Administrative Fees",
+"Lessons & Learning",
+"Media Subscriptions",
+"Medical + Birth",
+"Pets",
+"Rent",
+"Restaurants/Dinner Take Out",
+"School Tuition and Fees",
+"transit",
+"Uber, Lyft, Cabs, Car2Go, Public Transit, Bikeshare ",
+"Water Bill",
+"Unknown",
+"Internet",
+"Hella's Real Estate Expenses",
+"Occasional Babysitting",
+"Rosemary Funeral",
+"Stuff I Forgot to Budget For",
+"Portugal Relocation Project",
+"Mortgage"]
 
 # old code to load from the file, using a spreadsheet now
 def load_categorized_trans():
@@ -46,8 +100,10 @@ def load_trans_from_gsheet():
     sh = gc.open_by_key(S_KEY)
     worksheet =  sh.get_worksheet(0)
     trans = pd.DataFrame(worksheet.get_all_records())
+#    trans.set_index("PK",inplace=True,verify_integrity=False)
 #    trans = trans.loc[trans["newt"].isin(["D", "C"])] # we currently have D, C, P, T and F? MAYBE I for income
 
+    #trans = trans.reset_index(names="PK")
     # this won't work anymore, unless we replace empty string with None
     trans["category"] = trans["category"].apply(lambda x: None if x == "" else x)
     trans['category'] = trans['category'].fillna("Unknown") # mark the unknown category
@@ -90,6 +146,7 @@ with ui.value_box(showcase=icon("piggy-bank")):
         return '{:20,.2f} '.format(get_summary()["amount"].sum())
 
 
+
 with ui.layout_columns(col_widths=[5,7,12]):
 
     with ui.card(full_screen=True):
@@ -115,34 +172,47 @@ with ui.layout_columns(col_widths=[5,7,12]):
         ui.card_header("Detail Data")
         @render.data_frame
         def transactions_df():
-#            load_trans_from_gsheet()
-            return render.DataGrid(filtered_df(), filters=True, editable=True)  
+            df = filtered_df()
+            return render.DataGrid(df, filters=True, selection_mode="row")  
 
 @transactions_df.set_patch_fn
 def _(*, patch: render.CellPatch):
         update_data_with_patch(patch)
         return patch["value"]    
 
-def update_data_with_patch(patch):
+def update_data_with_patch():
+    # we have to update trans, the source dataset, and the spreadsheet, we maybe could also update the data behind the grid as displayed
+    pk_ = input.edit_pk()
+    ed_cat = input.edit_cat()
+    ed_sub = input.edit_sub()
+    ed_memo = input.edit_memo()
+    ed_desc = input.edit_desc()
     df_copy = transactions_df.data_view()
-    col_to_update = int(patch["column_index"])
-    pk_ = int(df_copy.iat[patch["row_index"],PK_COL] )
+    orig_sub = trans.loc[trans["PK"] == int(pk_)]["subcat"].to_numpy()[0]
+    orig_memo = trans.loc[trans["PK"] == int(pk_),"memo"].to_numpy()[0] 
+    orig_cat = trans.loc[trans["PK"] == int(pk_)]["category"].to_numpy()[0]
+
+    df_copy.loc[df_copy["PK"] == int(pk_),"subcat"] = ed_sub
+    df_copy.loc[df_copy["PK"] == int(pk_),"memo"] = ed_memo
+    df_copy.loc[df_copy["PK"] == int(pk_),"category"] = ed_cat
+    trans.loc[trans["PK"] == int(pk_),"subcat"] = ed_sub
+    trans.loc[trans["PK"] == int(pk_),"memo"] = ed_memo
+    trans.loc[trans["PK"] == int(pk_),"category"] = ed_cat
 #    for i in range(0,10):
-#        print(f' row col  {i} {df_copy.iat[patch["row_index"],i]} ') 
-#    print(f"updateing pk {pk_} by changing row {patch["row_index"]} column {patch["column_index"]} to new value {patch["value"]}")
-    df_copy.iat[patch["row_index"], patch["column_index"]] = patch["value"]
-    if (col_to_update == SUB_COL or col_to_update == MEMO_COL ):
-        credentials =  json.loads(os.environ["SERVICE_JSON"])
-        gc = gspread.service_account_from_dict(credentials)
-        sh = gc.open_by_key(S_KEY)
-        worksheet =  sh.get_worksheet(0)
-        w_pk = worksheet.cell(pk_, PK_UPDATE).value
-#        print(f"Updating row with pk {w_pk}")
-#        worksheet.update_cell(1, 16, 'Bingo!')
-        if (col_to_update == SUB_COL ):
-            worksheet.update_cell(pk_, SUB_UPDATE,  patch["value"])
-        else:
-            worksheet.update_cell(pk_, MEMO_UPDATE,  patch["value"])
+#        print(f' row {patch["row_index"]} col  {i} {df_copy.iat[patch["row_index"],i]} ') 
+#    print(f"updateing pk {pk_} by changing row {patch["row_id"]} column {patch["column_index"]} to new value {patch["value"]}")
+#    df_copy.iat[patch["row_index"], patch["column_index"]] = patch["value"]
+    credentials =  json.loads(os.environ["SERVICE_JSON"])
+    gc = gspread.service_account_from_dict(credentials)
+    sh = gc.open_by_key(S_KEY)
+    worksheet =  sh.get_worksheet(0)
+    print(f"Updating row with pk {pk_}")
+    if (orig_sub != ed_sub ):
+        worksheet.update_cell(int(pk_), SUB_UPDATE,  ed_sub)
+    if (orig_memo != ed_memo ):
+        worksheet.update_cell(int(pk_), MEMO_UPDATE, ed_memo)
+    if (orig_cat != ed_cat ):
+        worksheet.update_cell(int(pk_), CAT_UPDATE,  ed_cat)
 
 
 @reactive.calc
@@ -279,7 +349,53 @@ def get_summary():
 #def output_file(sumt,year):
    #  sumt.to_csv("/Users/cmcnally/Dropbox/python/textfiles/sorted" + year + ".csv", index=False)
 
+@reactive.effect
+@reactive.event(input.transactions_df_selected_rows)
+def on_row_selected():
+    data_selected = input.transactions_df_selected_rows()
+    if not data_selected:
+        return
+    data_selected = transactions_df.data_view(selected=True)
+    if  data_selected.empty:
+        return
+    pk_ = data_selected["PK"].to_numpy()[0]
+    desc_ = data_selected["desc"].to_numpy()[0]
+    cat_ =  data_selected["category"].to_numpy()[0]
+    sub_ = data_selected["subcat"].to_numpy()[0]
+    memo_ = data_selected["memo"].to_numpy()[0]
+    amount_ = data_selected["amount"].to_numpy()[0]
+    usd_ = data_selected["usd"].to_numpy()[0]
+    # Create a read-only input by adding the 'readonly' attribute
+    #pk_input = ui.input_text("pk", "Primary Key:", value="TXN-90210")
+    #pk_input.children[1].attrs.update({"readonly": "readonly"})
+    pk_input = ui.input_text("edit_pk", "PK", value=str(pk_))
+    pk_input.children[1].attrs.update({"readonly": "readonly"})
+    amount_input =    ui.input_text("edit_amount", "Euros", value=str(amount_))
+    amount_input.children[1].attrs.update({"readonly": "readonly"})
+    usd_input =    ui.input_text("edit_usd", "USD", value=str(usd_))
+    usd_input .children[1].attrs.update({"readonly": "readonly"})
+    m = ui.modal(
+        pk_input,
+        ui.input_text("edit_desc", "Desc", value=desc_),
+        ui.input_text("edit_memo", "Memo", value=memo_),
+        ui.input_selectize("edit_cat", "Category", categories, selected = cat_),
+        ui.input_text("edit_sub", "Subcategory", value=sub_),
+        amount_input,
+        usd_input, 
+        title = "Edit Transaction",
+        footer=ui.div(
+            ui.modal_button("Cancel"), # Closes modal without action
+            ui.input_action_button("save", "Save Changes", class_="btn-primary")
+        ),easy_close=True
+    )
+    ui.modal_show(m)
 
+# Logic to close the modal after clicking 'Save'
+@reactive.effect
+@reactive.event(input.save)
+def _():
+    update_data_with_patch()
+    ui.modal_remove()
 
 @reactive.calc
 def get_trans():
