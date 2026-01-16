@@ -162,10 +162,15 @@ def load_csv_trans(infile):
         trans = list(reader)
     return trans
 
-def write_updated_transactions(trans,outfile):
-    trabs = sorted(trans, key=lambda x: (x['lance'], x['balance']))
-# orig    header = ["lance","dv","desc","amount","newt","balance","usd","erate","memo","category","subcat","fragment","who"]
-    header = ["lance","dv","desc","category","memo","amount","newt","balance","usd","erate","subcat","fragment","who"]
+def write_updated_transactions(trans,outfile, account=None):
+    trans = sorted(trans, key=lambda x: (x['lance'], x['balance']))
+    if (account == None):
+        header = ["lance","dv","desc","category","memo","amount","newt","balance","usd","erate","subcat","fragment","who"]
+    else:
+        header = ["account","lance","dv","desc","category","memo","amount","newt","balance","usd","erate","subcat","fragment","who"]
+        for t in trans:
+            t["account"] = account
+
     with open(outfile, 'w', newline='') as csvfile:
        writer = csv.DictWriter(csvfile, fieldnames=header)
        writer.writeheader()
@@ -296,8 +301,18 @@ work = [
     "outfile": "/Users/cmcnally/Dropbox/python/textfiles/categorized-converted_FIXED-milen-2024.csv",
     "do_atm": False,
     "do_cats": True,
+    "process": False,
+    "writeFile": True,
+    "account" : "Millenium"
+  },
+   { 
+    "infile": "/Users/cmcnally/Dropbox/python/textfiles/uncategorized-mil-Portuguese-banks-2026-01-15.csv",
+    "outfile": "/Users/cmcnally/Dropbox/python/textfiles/categorized--mil-Portuguese-banks-2026-01-15.csv",
+    "do_atm": False,
+    "do_cats": True,
     "process": True,
-    "writeFile": True
+    "writeFile": True,
+    "account" : "Millenium"
   }
 ]
 all_trans =[]        
@@ -309,7 +324,7 @@ for w in work:
         if w["do_atm"]:
             deal_with_atm(transactions) #this adjusts hellas atms for clara
         if w["writeFile"]:
-            write_updated_transactions(transactions,w["outfile"])
+            write_updated_transactions(transactions,w["outfile"],w["account"])
         all_trans.extend(transactions)
 #update_categories_file(category_list)
 

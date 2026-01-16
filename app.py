@@ -131,8 +131,14 @@ def make_summary_table(detail):
 details = load_trans_from_gsheet()
 trans = reactive.Value(details)
 summary = make_summary_table(details)
+
+ui.tags.style("""
+    .modal-dialog { 
+        margin-top: 5vh !important; 
+    }
+""")
 with ui.sidebar():
-    ui.input_selectize("input_year", "Years", choices=("All Years","Date Range","2025","2024","2023","2022","2021"), selected="All Years")
+    ui.input_selectize("input_year", "Years", choices=("All Years","2026","2025","2024","2023","2022","2021"), selected="All Years")
     ttypes = {"'D'":"Debit","'C'":"Credit","'T'":"Transfers","'P'":"Credit Card Payments","'I'":"Income"}
     ui.input_checkbox_group("types","Transaction Types",choices=ttypes,selected=(["'D'","'C'"]))
 #    ui.input_date_range("inDateRange", "Input date", start="2024-11-01", end="2025-11-30")

@@ -75,7 +75,7 @@ def process_2025(fileName = None):
     dataf.loc[dataf.type == "Débito",'newt'] = "D"
     dataf.loc[dataf.type == "Crédito",'newt'] = "C"
     # fix transferwise here now to Payment
-    dataf.loc[dataf["desc"].str.contains("Wise", case=True, na=False),"newt"] = "P"
+    dataf.loc[dataf["desc"].str.contains("Wise", case=True, na=False),"newt"] = "T"
 # this does not work because it thinks its a regexp with the (), so do it manually in the csv file
 #   dataf.loc[dataf["desc"].str.contains("Ord.Pgt.do Estrg./SCH REF(Y 1 0000077134801)", case=False, na=False),"newt"] = "P"
     header = ["lance","dv","desc","amount","newt","balance","usd","erate","memo","category","subcat","fragment","who"]
@@ -269,11 +269,11 @@ files_2025 = (
 "Portugues-bank-2025-11.csv","Portugues-bank-2025-12.csv")
 
 
-process_2024()
+#process_2024()
 
 #process_2025()
-
+process_2025( "Portuguese-banks-2026-01-15.csv")
 #process_2023()
 
 #process_ancillary( ["Portugues-bank-2023-11.csv","Portugues-bank-2023-12.csv"],"-2023-11-12")
-process_ancillary( ["Portugues-bank-2025-12-anc.csv"],"-2025-12")
+##process_ancillary( ["Portugues-bank-2025-12-anc.csv"],"-2025-12")

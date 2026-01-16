@@ -39,7 +39,8 @@
     "payee_contains": [
       "Josepha Ling Barrett",
       "Cidade Logica",
-      "Cidade togica"
+      "Cidade togica",
+      "CIDADE LOGICA"
     ],
     "weight": 22,
     "fragment_weights": {
@@ -391,6 +392,8 @@
       "NSTITITO MICROC": "Glasses/Contacts",
       "Opticas": "Glasses/Contacts",
       "FARMACIA": "Pharmacy",
+      "Farmacia": "Pharmacy",
+      "BRANCO LISBOA": "Pharmacy",
       "OARHEALTH": "Pharmacy",
       "Oarrx.com": "Pharmacy",
       "Allday": "Pharmacy",
