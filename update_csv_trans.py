@@ -310,9 +310,18 @@ work = [
     "outfile": "/Users/cmcnally/Dropbox/python/textfiles/categorized--mil-Portuguese-banks-2026-01-15.csv",
     "do_atm": False,
     "do_cats": True,
-    "process": True,
+    "process": False,
     "writeFile": True,
     "account" : "Millenium"
+  },
+   { 
+    "infile": "/Users/cmcnally/Dropbox/python/textfiles/uncategorized_Chase_Activity-20260115.csv",
+    "outfile": "/Users/cmcnally/Dropbox/python/textfiles/categorized_Chase_Activity-20260115.csv",
+    "do_atm": False,
+    "do_cats": True,
+    "process": True,
+    "writeFile": True,
+    "account" : "Chase Sapphire"
   }
 ]
 all_trans =[]        

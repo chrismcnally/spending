@@ -75,14 +75,12 @@ categories = ["Amazon -- already categorized individulally",
 def load_categorized_trans():
     #trans =  pd.read_csv("textfiles/categorized-all-2024-2025.csv")
     trans = pd.read_csv("https://raw.githubusercontent.com/chrismcnally/spending/refs/heads/master/textfiles/categorized-all-2024-2025.csv")
-    #trans = trans.loc[trans["newt"].isin(["D", "C"])] # we currently have D, C, P, I and F? 
     trans['category'] = trans['category'].fillna("Unknown") # mark the unknown category
     trans.sort_values(by=["lance","dv","balance"], ascending=[True, True, False], inplace=True)
     trans.drop(columns=["balance","dv","erate","fragment","who"], inplace=True)
     all_dates = trans["lance"] #gather all dates. this is a list of the values in that column
     year_months = [x[0:4] + x[5:7] for x in all_dates]  
     years =  [x[0:4]  for x in all_dates]
-#    testdates = [x[0:4] + "-" +  x[5:7] + "-01" for x in all_dates]  
     trans["year"] = years
     trans["year_month"] = year_months
     trans["amount"]  = pd.to_numeric(trans["amount"] , errors='coerce')
@@ -99,10 +97,6 @@ def load_trans_from_gsheet():
     sh = gc.open_by_key(S_KEY)
     worksheet =  sh.get_worksheet(0)
     trans = pd.DataFrame(worksheet.get_all_records())
-#    trans.set_index("PK",inplace=True,verify_integrity=False)
-#    trans = trans.loc[trans["newt"].isin(["D", "C"])] # we currently have D, C, P, T and F? MAYBE I for income
-
-    #trans = trans.reset_index(names="PK")
     # this won't work anymore, unless we replace empty string with None
     trans["category"] = trans["category"].apply(lambda x: None if x == "" else x)
     trans['category'] = trans['category'].fillna("Unknown") # mark the unknown category
@@ -112,7 +106,6 @@ def load_trans_from_gsheet():
     all_dates = trans["lance"] #gather all dates. this is a list of the values in that column
     year_months = [x[0:4] + x[5:7] for x in all_dates]  
     years =  [x[0:4]  for x in all_dates]
-#    testdates = [x[0:4] + "-" +  x[5:7] + "-01" for x in all_dates]  
     trans["year"] = years
     trans["year_month"] = year_months
     trans["amount"]  = pd.to_numeric(trans["amount"] , errors='coerce')
@@ -185,6 +178,7 @@ with ui.layout_columns(col_widths=[5,7,12]):
         ui.card_header("Filtered Totals")
         @render.text
         def do_totals():
+            # this might be a problem
             totals = calc_filtered_sum()
             return f'{totals["count"]} filtered rows. Total Euros {totals["euros"]:,.2f} Total dollars {totals["usd"]:,.2f}'
 
@@ -196,6 +190,7 @@ def _(*, patch: render.CellPatch):
 def update_data_with_patch():
     # we have to update trans, the source dataset, and the spreadsheet, we maybe could also update the data behind the grid as displayed
     pk_ = input.edit_pk()
+    print(f"Updating row with pk {pk_}")
     ed_cat = input.edit_cat()
     ed_sub = input.edit_sub()
     ed_memo = input.edit_memo()
@@ -212,12 +207,11 @@ def update_data_with_patch():
     new_trans.loc[new_trans["PK"] == int(pk_),"subcat"] = ed_sub
     new_trans.loc[new_trans["PK"] == int(pk_),"memo"] = ed_memo
     new_trans.loc[new_trans["PK"] == int(pk_),"category"] = ed_cat
-    trans.set(new_trans)
+    trans.set(new_trans) # trans is a reactive variable, called with trans.get() and trans.set() (use get_trans() to get the value not trans.get())
     credentials =  json.loads(os.environ["SERVICE_JSON"])
     gc = gspread.service_account_from_dict(credentials)
     sh = gc.open_by_key(S_KEY)
     worksheet =  sh.get_worksheet(0)
-    print(f"Updating row with pk {pk_}")
     if (orig_sub != ed_sub ):
         worksheet.update_cell(int(pk_), SUB_UPDATE,  ed_sub)
     if (orig_memo != ed_memo ):
@@ -227,8 +221,12 @@ def update_data_with_patch():
 
 @reactive.calc
 def calc_filtered_sum():
-    view = transactions_df.data_view()
-
+    # this is the problem
+    view = None
+    try:
+        view = transactions_df.data_view()
+    except:
+        print("simpluy calling transactions_df.data_view() produced error I don't know why transactions_df is not null")
     if view is None or view.empty:
         return {
             "count": 0,
@@ -241,18 +239,24 @@ def calc_filtered_sum():
         "euros": view["amount"].sum(),
         "usd" : view["usd"].sum()
     }
-
+# this is called 2x on startup no errors. when select 2026
 @reactive.calc
 def filtered_df():
     # When a summary rows is selected use it as a filter, otherwise, render the detail rows normally 
-    # this should respect the filters in the sidebar too (eh not sure)
+    # this should respect the filters in the sidebar, years, transaction types and sort
     data_selected = summary_df.data_view(selected=True)
+    alltrans = get_trans()
+    # filter by transaction type
+    qstr = buildFilter()
+    # filter by years
+    if not input.input_year() in ["All Years"]:
+        qstr += " and year == '" + input.input_year() + "'"
+    alltrans = alltrans.query(qstr)
     if ( data_selected.empty):
-        trans = get_trans()
         sort = input.sort_by()
         if (sort == "Date"):
             sort = "lance"
-        return  trans.sort_values(by=[sort,'lance','category'])   
+        return  alltrans.sort_values(by=[sort,'lance','category'])   
     else:
         category = data_selected["category"].to_numpy()[0]
         category = category.replace("'","\\'",1)
@@ -265,7 +269,7 @@ def filtered_df():
             year_month = data_selected["year"].to_numpy()[0]
             qstr1 = f"category ==  '{category}' and year == '{year_month}'"
         # Filter data for selected category and dates
-        return get_trans().query(qstr1)
+        return alltrans.query(qstr1)
     
 @reactive.calc
 def buildFilter():
@@ -284,7 +288,7 @@ def get_pie_data():
     data_selected = summary_df.data_view(selected=True)
     if ( data_selected.empty):
         qstr = ""
-        if input.input_year() in ["All Years","Date Range"]:
+        if input.input_year() in ["All Years"]:
             title = "All Years"
             qstr = ""
         else:

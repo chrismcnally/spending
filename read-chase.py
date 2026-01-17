@@ -92,67 +92,66 @@ monthly_ex_rates = {
 "202509" :	(1.173437, 0.852212 ),
 "202510" : 	(1.164413, 0.858819 ),
 "202511" : 	(1.156707, 0.864535 ),
-"202512" :  (1.168906, 0.85552)
+"202512" :  (1.168906, 0.85552),
+"202601" : ( 1.178418, 0.848595)
 }
 # convert ctype to newt (D or C)
 # convert amount to Euros (from usd)
 
-files = ["Amazon-2024-2025-eruos.csv","Amazon-euro-dec-2025.csv"]
-euros = pd.concat(map(read_amazon_euros,files), axis = 0, ignore_index=True)
-euros = euros[['lance', 'dv', 'desc','amount','category']].copy()
-euros = add_usd_other_fields(euros)
+def process_amazon():
+    files = ["Amazon-2024-2025-eruos.csv","Amazon-euro-dec-2025.csv"]
+    euros = pd.concat(map(read_amazon_euros,files), axis = 0, ignore_index=True)
+    euros = euros[['lance', 'dv', 'desc','amount','category']].copy()
+    euros = add_usd_other_fields(euros)
 
-file = "Amazon-2024-2025-usd.csv"
-usds = read_amazon_usd(file)
-usds = usds[['lance', 'dv', 'desc','amount','category']].copy()
-usds = add_euro_other_fields(usds)
+    file = "Amazon-2024-2025-usd.csv"
+    usds = read_amazon_usd(file)
+    usds = usds[['lance', 'dv', 'desc','amount','category']].copy()
+    usds = add_euro_other_fields(usds)
 
-trans = pd.concat([euros,usds])
-header = ["lance","dv","desc","amount","newt","balance","usd","erate","memo","category","subcat","fragment","who"]
-trans.to_csv("/Users/cmcnally/Dropbox/python/textfiles/categorized-amazon-2024-2025.csv", index=False, columns=header,date_format='%Y-%m-%d')
+    trans = pd.concat([euros,usds])
+    header = ["lance","dv","desc","amount","newt","balance","usd","erate","memo","category","subcat","fragment","who"]
+    trans.to_csv("/Users/cmcnally/Dropbox/python/textfiles/categorized-amazon-2024-2025.csv", index=False, columns=header,date_format='%Y-%m-%d')
+
+def process_chase(infiles, outfile):
+    dataf = pd.concat(map(read_chase,infiles),axis = 0, ignore_index=True)
+    dataf = dataf.sort_values(by=['lance', 'dv'], ascending=[True,True])
+
+
+    dataf['amount'] = dataf.usd.apply(lambda x :round( Decimal(x),2)*Decimal(-1.0)) # make amount a decimal instead of float and negative
+
+    dataf["balance"] = 0
+    dataf["erate"] = Decimal(0)
+    dataf["memo"] = ""
+    # fix this to convert to euros
+    dataf['usd'] = dataf.usd.apply(lambda x :round( Decimal(x),2)) # make usd a decimal instead of float
+    dataf["category"] = ""
+    dataf["subcat"] = ""
+    dataf["fragment"] = ""
+    dataf["newt"] = "D"
+    dataf["who"] = ""
+
+    # convert Debito to D (in a new column newt)
+    dataf.loc[dataf.type == "Sale",'newt'] = "D"
+    dataf.loc[dataf.type == "Fee",'newt'] = "D"
+    dataf.loc[dataf.type == "Adjustment",'newt'] = "C"
+    dataf.loc[dataf.type == "Payment",'newt'] = "P"
+    dataf.loc[dataf.type == "Return",'newt'] = "C"
+
+    dataf["year_month"] = dataf.lance.apply(lambda x : x.date().strftime("%Y%m"))
+    erates = [ monthly_ex_rates[key][0] for key in dataf["year_month"]]  # store conversion from euro to usd in erate
+    dataf["erate"] = erates 
+    # for all the conversion factors we have, apply against USD to get Euros, store in the Amount field
+    dataf['amount'] = dataf.usd.apply(lambda usdol : round( Decimal(usdol),2)) # copy usd into amount (euro) column
+    for key in monthly_ex_rates:
+        dataf.loc[dataf.year_month == key, 'amount'] *= Decimal(monthly_ex_rates[key][1])
+    #    dataf.loc[dataf['year_month'] == key, 'amount'] = Decimal(dataf['usd'],2) * Decimal(monthly_ex_rates[key][0],4)
+    #    dataf['amount'] = np.where(np.equal(dataf['year_month'],key), Decimal(dataf['usd']) * Decimal(monthly_ex_rates[key][0]), dataf['amount'])
+
+    header = ["lance","dv","desc","amount","newt","balance","usd","erate","memo","category","subcat","fragment","who"]
+    dataf.to_csv("/Users/cmcnally/Dropbox/python/textfiles/" + outfile, index=False,encoding="ascii", columns=header)
 
 files = ("Chase_Activity-2024.csv","Chase_Activity-2025.csv","Chase-12-2025.csv","atms-from-schwab-2024-2025.csv")
-dataf = pd.concat(map(read_chase,files),axis = 0, ignore_index=True)
-dataf = dataf.sort_values(by=['lance', 'dv'], ascending=[True,True])
-
-amounts =  [Decimal(0)] * dataf["usd"].count() #make array of count() zeros
-dataf["amount"] = amounts
-balances =  [Decimal(0)] * dataf["usd"].count() #make array of count() zeros
-dataf["balance"] = balances
-rates =  [Decimal(0)] * dataf["usd"].count()
-dataf["erate"] = rates
-memos = [""] * dataf["usd"].count() 
-dataf["memo"] = memos
-# fix this to convert to euros
-dataf['usd'] = dataf.usd.apply(lambda x :round( Decimal(x),2)) # make usd a decimal instead of float
-category = [""] * dataf["usd"].count()
-dataf["category"] = category
-subcat = [""] * dataf["usd"].count()
-dataf["subcat"] = subcat
-frags = [""] * dataf["usd"].count()
-dataf["fragment"] = frags
-newt = ["x"] * dataf["usd"].count()
-dataf["newt"] = newt
-who = [""] * dataf["usd"].count()
-dataf["who"] = who
-# convert Debito to D (in a new column newt)
-dataf.loc[dataf.type == "Sale",'newt'] = "D"
-dataf.loc[dataf.type == "Fee",'newt'] = "D"
-dataf.loc[dataf.type == "Adjustment",'newt'] = "C"
-dataf.loc[dataf.type == "Payment",'newt'] = "P"
-dataf.loc[dataf.type == "Return",'newt'] = "C"
-
-all_dates = dataf["lance"] 
-year_months = [x.date().strftime("%Y%m") for x in all_dates]  
-dataf["year_month"] = year_months
-erates = [ monthly_ex_rates[key][0] for key in year_months]  # store conversion from euro to usd in erate
-dataf["erate"] = erates
-# for all the conversion factors we have, apply against USD to get Euros, store in the Amount field
-dataf['amount'] = dataf.usd.apply(lambda usdol : round( Decimal(usdol),2)) # copy usd into amount (euro) column
-for key in monthly_ex_rates:
-    dataf.loc[dataf.year_month == key, 'amount'] *= Decimal(monthly_ex_rates[key][1])
-#    dataf.loc[dataf['year_month'] == key, 'amount'] = Decimal(dataf['usd'],2) * Decimal(monthly_ex_rates[key][0],4)
-#    dataf['amount'] = np.where(np.equal(dataf['year_month'],key), Decimal(dataf['usd']) * Decimal(monthly_ex_rates[key][0]), dataf['amount'])
-
-header = ["lance","dv","desc","amount","newt","balance","usd","erate","memo","category","subcat","fragment","who"]
-dataf.to_csv("/Users/cmcnally/Dropbox/python/textfiles/uncategorized-chase-2024-2025.csv", index=False,encoding="ascii", columns=header)
+outfile = "uncategorized-chase-2024-2025.csv"
+#process_chase(files,outfile)
+process_chase(["Chase_Activity-20260115.csv"],"uncategorized_Chase_Activity-20260115.csv")
