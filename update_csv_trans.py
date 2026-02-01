@@ -6,6 +6,7 @@ import time
 import csv
 import datetime
 from decimal import Decimal
+from operator import itemgetter
 
 # this is the transaction updater, adds categories, uses the file categories_updated.json 
 # which is a custom categories files, no longer YNAB, it has the field payee_includes with a 
@@ -97,7 +98,30 @@ def apply_special_dates(tran):
     return FileNotFoundError
             
 
-def add_categories(transactions, categories):
+def add_categories_df(trans, fragments = None, amazon_off=True):
+    if (not fragments):
+        fragments = load_fragments()
+
+    for frag in fragments:
+        
+        trans.loc[trans["desc"].str.contains(frag["fragment"], case=False, na=False,regex=False),"category"] = frag["category"]
+        trans.loc[trans["desc"].str.contains(frag["fragment"], case=False, na=False,regex=False),"subcat"] = frag["subcat"]
+        trans.loc[trans["desc"].str.contains(frag["fragment"], case=False, na=False,regex=False),"fragment"] = frag["fragment"]
+
+    amazon = "Amazon -- already categorized individulally"
+    if (not amazon_off):
+        trans.loc[trans["category"] == amazon,"amount"] = Decimal(0.00)
+        trans.loc[trans["category"] == amazon,"usd"] = Decimal(0.00)
+    mcount =  len(  trans[ trans["category"] == '']  )
+    count =   len(trans)
+    print(f"found categories for {count - mcount} rows, {mcount} rows missing categories")
+    print( trans[ trans["category"] == ''][["lance","desc", "amount"]])
+    # report transactions that have no category?
+    return trans
+
+def add_categories(transactions, categories = None):
+    if (not categories):
+        categories = load_updated_categories()
     # lance,dv,desc,amount,type,balance,usd,erate,memo,category,subcat,fragment,who
     amazon = "Amazon -- already categorized individulally"
     for trans in transactions: #payees.values:
@@ -156,6 +180,9 @@ def update_category(fragment, category, amount):
         category["weight"]  = category["weight"] + 1
         
 
+def load_fragments():
+    return   load_csv_trans("frags-cats.csv")
+
 def load_csv_trans(infile):
     with open(infile,"r",encoding="utf-8-sig") as csvfile:
         reader = csv.DictReader(csvfile)
@@ -182,6 +209,27 @@ def update_categories_file(catlist):
     catFile = "categories_updated.json"
     with open(catFile, "w") as jFile:
             json.dump(catlist, jFile, indent=2)
+
+def reformat_categories():
+    fragments = []
+    categories = load_updated_categories(False)
+    for cat in categories:
+        for name_fragment in cat["payee_contains"]:
+            frag = {'fragment' : name_fragment, 'category' : cat["name"], 'weight':0}
+            if ("fragment_weights" in cat and name_fragment in cat["fragment_weights"]):
+                frag.update({'weight' : cat["fragment_weights"][name_fragment]})   
+            if ("sub-category" in cat and name_fragment in cat["sub-category"]):
+                frag.update({'subcat' : cat["sub-category"][name_fragment]})   
+            fragments.append(frag)
+            #{ "EVDCR" : "category" : "Hella's Hobbies and Sports", "weight":22, "subcat":"Escola Dance"}
+    newlist = sorted(fragments, key=itemgetter('weight'), reverse=True)
+    header = ["fragment","category","weight","subcat"]
+    with open("new_fragments", 'w', newline='') as csvfile:
+       writer = csv.DictWriter(csvfile, fieldnames=header)
+       writer.writeheader()
+       writer.writerows(newlist)
+
+    return newlist
 
 def load_updated_categories(reset=False):
     cats = []
@@ -226,10 +274,6 @@ def make_search_structures():
     # when we have some data, find the most popular keys, make a list of the top 10 or 25 and check those first
     # could also do a hashmap by value, ie all 80 eros are Nuno, all 45 are iris, 
 
-transactions = []
-amount_to_category = {}
-category_list = load_updated_categories(True)  
-# where is the amazon?
 work = [
   {
     "infile": "/Users/cmcnally/Dropbox/python/textfiles/uncategorized-mil-2025.csv",
@@ -324,18 +368,27 @@ work = [
     "account" : "Chase Sapphire"
   }
 ]
-all_trans =[]        
-for w in work:
-    if (w["process"]):
-        transactions = load_csv_trans(w["infile"])
-        if w["do_cats"]:
-            transactions = add_categories(transactions, category_list)
-        if w["do_atm"]:
-            deal_with_atm(transactions) #this adjusts hellas atms for clara
-        if w["writeFile"]:
-            write_updated_transactions(transactions,w["outfile"],w["account"])
-        all_trans.extend(transactions)
-#update_categories_file(category_list)
 
-#do all of them
-   # write_updated_transactions(all_trans,"/Users/cmcnally/Dropbox/python/textfiles/categorized-all-2024-2025.csv")
+
+if __name__ == "__main__":
+    transactions = []
+    amount_to_category = {}
+    reformat_categories()
+    category_list = load_updated_categories(False)  
+    # where is the amazon?
+
+    all_trans =[]        
+    for w in work:
+        if (w["process"]):
+            transactions = load_csv_trans(w["infile"])
+            if w["do_cats"]:
+                transactions = add_categories(transactions, category_list)
+            if w["do_atm"]:
+                deal_with_atm(transactions) #this adjusts hellas atms for clara
+            if w["writeFile"]:
+                write_updated_transactions(transactions,w["outfile"],w["account"])
+            all_trans.extend(transactions)
+    #update_categories_file(category_list)
+
+    #do all of them
+    # write_updated_transactions(all_trans,"/Users/cmcnally/Dropbox/python/textfiles/categorized-all-2024-2025.csv")

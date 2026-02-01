@@ -97,6 +97,7 @@ def load_trans_from_gsheet():
     sh = gc.open_by_key(S_KEY)
     worksheet =  sh.get_worksheet(0)
     trans = pd.DataFrame(worksheet.get_all_records())
+    print(f"the spreadsheet currently has {worksheet.row_count} rows")
     # this won't work anymore, unless we replace empty string with None
     trans["category"] = trans["category"].apply(lambda x: None if x == "" else x)
     trans['category'] = trans['category'].fillna("Unknown") # mark the unknown category
@@ -226,7 +227,7 @@ def calc_filtered_sum():
     try:
         view = transactions_df.data_view()
     except:
-        print("simpluy calling transactions_df.data_view() produced error I don't know why transactions_df is not null")
+        print("simpluy calling transactions_df.data_view() throws an exception, I don't know why: transactions_df is not null")
     if view is None or view.empty:
         return {
             "count": 0,
@@ -287,24 +288,13 @@ def buildFilter():
 def get_pie_data():
     data_selected = summary_df.data_view(selected=True)
     if ( data_selected.empty):
-        qstr = ""
+        qstr = buildFilter()    
         if input.input_year() in ["All Years"]:
             title = "All Years"
-            qstr = ""
         else:
-            qstr = "year == '" + input.input_year() + "'"
-            title = "Year " + input.input_year() 
-        types = buildFilter()    
-        if qstr == "":
-            if (types is not None):
-                qstr = types    
-                summary = get_trans().query(qstr).copy()
-            else:
-                summary = get_trans().copy()
-        else:
-            qstr += " and " + types
-            summary = get_trans().query(qstr).copy()
-
+            title = f"Year {input.input_year()}" 
+            qstr = f"{qstr} and year == '{input.input_year()}'" 
+        summary = get_trans().query(qstr).copy()
         summary = summary.groupby(['category'])['amount'].sum().reset_index()
         total = summary.amount.sum()
         summary.amount = summary.amount.apply(lambda negamt : abs(round( Decimal(negamt),2))) # pie positive numbers only
@@ -340,6 +330,8 @@ def get_pie_data():
         title = f"{title} €{total:,.0f}" #{:,.0f}
         # gsheet has empty string instead of null or None, fix to None
         data["subcat"] = data["subcat"].apply(lambda x: None if x == "" else x)
+        data["memo"] = data["memo"].apply(lambda x: None if x == "" else x)
+        data['subcat'] = data.subcat.combine_first(data.memo)# when subcat is null, replace with memo first then desc
         data['subcat'] = data.subcat.combine_first(data.desc)# when subcat is null, replace with desc
         data = data.groupby('subcat')['amount'].sum().reset_index()
         data.amount = data.amount.apply(lambda negamt : abs(round( Decimal(negamt),2))) # pie positive numbers only

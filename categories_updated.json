@@ -152,6 +152,7 @@
     "group_id": "c203f5c6-a35d-4fae-ba4e-e4814059c637",
     "group_name": "True Expenses",
     "sub-category": {
+      "VARANDAS E ALMEIDA":"Repair",
       "COUTINHO": "Repair",
       "M COUTINHO OESTE": "Repair",
       "CA E RA": "Repair",
@@ -170,6 +171,7 @@
     },
     "payee_contains": [
       "Bonita trimeloni",
+      "VARANDAS E ALMEIDA",
       "VIAVERDE",
       "REPSOL",
       "COUTINHO",
@@ -324,6 +326,7 @@
     "payee_contains": [
       "CLINIMED",
       "CLINICA ESTEVAO",
+      "DRA MAFALDA JOANA SILVA FIGUEIRED",
       "JOAQUIM CHAVES",
       "CLINICA",
       "MONTEPIO",
@@ -549,6 +552,8 @@
       "SAFFLOR",
       "167825390832809",
       "Green Love Restauran",
+      "FUNKY",
+      "KABUKI",
       "INFUSION",
       "MOMENTOS NO BASTIDORFIG",
       "CAMAROEIRO REAL",
@@ -685,6 +690,7 @@
       "ATHLETEREG",
       "TRAININGPEAKS",
       "COGNITIVEMETRICS",
+      "RUPO DESPORTIVO CONCHA AZU",
       "RUNKD.IT 0-55EC-4EF1-803D",
       "ALL RUN",
       "RUNKD",
@@ -726,6 +732,7 @@
     "group_name": "Food & Drink",
     "payee_contains": [
       "MOMO SWEETSETEA",
+      "BITESEBITAITES",
       "KFC AEROPORTO",
       "CUF SANTAREM CAFE",
       "CASA GIL",
@@ -1558,6 +1565,7 @@
       "TRF MB WAY P/ *****7470": "Ceramica"
     },
     "payee_contains": [
+      "CONSERVATORIO",
       "TRF MB WAY P/ *****4952",
       "TRF MB way P/ *****6234",
       "TRE MB WAY P/ *****6234",
