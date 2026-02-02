@@ -115,10 +115,11 @@ def add_categories_df(trans, fragments = None, amazon_off=True):
     mcount =  len(  trans[ trans["category"] == '']  )
     count =   len(trans)
     print(f"found categories for {count - mcount} rows, {mcount} rows missing categories")
-    print( trans[ trans["category"] == ''][["lance","desc", "amount"]])
+    print( trans[ trans["category"] == ''][["lance","desc", "amount","usd"]])
     # report transactions that have no category?
     return trans
 
+# very old code to add categories, no longer running these as scripts everything called from read-cat.py
 def add_categories(transactions, categories = None):
     if (not categories):
         categories = load_updated_categories()
@@ -242,37 +243,6 @@ def load_updated_categories(reset=False):
     return cats
 
 
-# this parsed the old YNAB file, categories.json, still have it but not used, categories-updated.json is the new source
-def parse_categories_with_contains(catJson):
-    categories = []
-    groups = catJson["data"]["category_groups"]
-    for cg in groups:
-        #print (cg["id"],cg["name"])
-        for cats in cg["categories"]:
-            # skip some categories used by ynab but not me
-            if  "payee_contains" in cats  and  cats["payee_contains"] is not None:
-                weight = 1
-                frags = {}
-                if  ("weight" in cats):
-                    weight = cats["weight"]
-                if  ("fragment_weights" in cats):
-                    frags = cats["fragment_weights"]
-                categories.append({"id":cats["id"], 
-                                    "name": cats["name"],
-                                    "group_id": cats["category_group_id"], 
-                                    "group_name":cg["name"],
-                                    "payee_contains" : cats["payee_contains"],
-                                    "weight" : weight,
-                                    "fragment_weights" : frags
-                                    })
-    return categories
-
-def make_search_structures():
-    # sort the categories by category weight so the top categories are first. all this optimization
-    # is not needed because it runs fast already
-    category_list.sort(reverse=True,key=lambda cat: cat["weight"])
-    # when we have some data, find the most popular keys, make a list of the top 10 or 25 and check those first
-    # could also do a hashmap by value, ie all 80 eros are Nuno, all 45 are iris, 
 
 work = [
   {

@@ -80,6 +80,11 @@ EST SERVICO,Car/Gas/Tolls/Parking/repair,8,Gas
 JCLAC POSTO BLC,Medical + Birth,8,Blood Tests
 MERCADONA,Groceries,8,
 SEVILLA,Family Vacations,8,
+UNITED      0162367927940,Family Vacations,1,
+UNITED      0162367927939,Family Vacations,1,
+UNITED      0162367927938,Family Vacations,1,
+UNITED      0164364660306,Family Vacations,1,
+AIRBNB * HMNAPBATKM,Family Vacations,1,
 LEVALLOIS-PERRET,Hella Travel,8,
 AEGEAN,Hella Travel,8,
 COMPRA 0885 Vinted,Fraud,8,
@@ -126,6 +131,7 @@ CHILDRENS WORLD,"Children's Enrichment Classes",5,Dr. Andreia
 SANAPSY,"Children's Enrichment Classes",5,J Santos
 AIRALO,Chris Travel,5,
 Vinted Vilnius,Fraud,5,
+Vinted,Kids Clothing and Baby Gear,3,
 COLEGIO RAINHA,School Tuition and Fees,4,
 CORREIOS,Legal & Administrative Fees,4,
 DD PT61111450 CTT - AGUA/GAS,Water Bill,4,
@@ -133,6 +139,7 @@ IHERB,Medical + Birth,4,Pharmacy
 PIZZA HUT,Restaurants/Dinner Take Out,4,
 WHAT THE FOLK,Hella's Lunches/Fast Food,4,
 SPORT ZONE VIVACI,Chris Hobbies,4,
+RAILWAY,Chris Hobbies,4,
 Vasiliki Flora,Lessons & Learning,4,
 GRUTAS,Family Entertainment,4,
 SALAMANCA,Family Vacations,4,SALAMANCA
@@ -160,6 +167,7 @@ AGRILOJA,Caldas home wares etc,3,
 CINEPLACE,Family Entertainment,3,
 MOSTEIRO,Family Entertainment,3,
 REBECCA MC KINLEY,Family Vacations,3,
+Cars on Booking,Family Vacations,1,
 PORTO EDITORA,"Books, mostly hella",3,
 MANGO DE CALDAS,"Hella Clothing, Shoes, Accessories",3,
 MB way P/ *****3313,"Children's Enrichment Classes",3,Marg Cunha
@@ -221,6 +229,7 @@ AIRBNB * HMP48WRMRE,Family Vacations,2,
 AIRBNB * HMR53ZJC59,Family Vacations,2,
 LIVRARIA,"Books, mostly hella",2,
 TEACHERSPAYTEACHERS.COM,"Books, mostly hella",2,Kids Books
+GIRL SCOUTS,"Birthdays, Christmas, Gifts, Parties",2,
 COMERCIO ARTIGO,"Birthdays, Christmas, Gifts, Parties",2,
 TRF MB WAY P/ *****8823,"Birthdays, Christmas, Gifts, Parties",2,KIDS RAINHA ZOE
 ALE HOP,"Birthdays, Christmas, Gifts, Parties",2,
@@ -378,6 +387,12 @@ Splash,Family Entertainment,1,
 BERLENGATUR,Family Entertainment,1,
 TURTLEBACK,Family Entertainment,1,
 ET CAR HIRE,Family Vacations,1,sao miguel
+RYANAIR,Family Vacations,1,
+AIRBNB,Family Vacations,1,
+Trainline,Family Vacations,1,
+HERTZ,Family Vacations,1,
+EASYJET,Family Vacations,1,
+FlyTAP,Family Vacations,1,
 PASARON,Family Vacations,1,Caceres
 PONTA DELGAGADA,Family Vacations,1,
 46827/086126624,Family Vacations,1,sao miguel
@@ -551,6 +566,7 @@ Oarrx.com,Medical + Birth,0,Pharmacy
 "DD PT73101243 MEO, SA         42473235217",Internet,0,
 PT73101243 MEO,Internet,0,
 DD MEO,Internet,0,
+Zumub,Groceries,0,
 TALHO JARDIM,Groceries,0,
 SPAR CALDAS,Groceries,0,
 TRF P/ LISA FRANCINE OSBORNE,Groceries,0,COSTCO
