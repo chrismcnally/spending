@@ -129,4 +129,5 @@ file = "Schwab_751_Checking_31012026.csv"
 #handle_schwab(file,"Sch-Checking-751")
 #handle_schwab(file,"Sch-192-Rosemary")
 file = "ally_1051307708_2025.csv"
-handle_ally(file,"ally-1051307708")
+file = "ally_sav-mc-combo-2025.csv"
+handle_ally(file,"ally-2151307713-2190559050")
