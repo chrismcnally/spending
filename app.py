@@ -9,9 +9,8 @@ import os
 import json
 
 S_KEY = "1ai9nZYCNw5g5-fv0-siPryHWYwl7hSfTunq5wswYfDo"
-PK_COL = 9
-SUB_COL = 8
-MEMO_COL = 4
+PK_COL = 15
+ACC_UPDATE = 1
 CAT_UPDATE = 5
 MEMO_UPDATE = 6
 SUB_UPDATE = 12
@@ -196,29 +195,41 @@ def update_data_with_patch():
     ed_sub = input.edit_sub()
     ed_memo = input.edit_memo()
     ed_desc = input.edit_desc()
+    ed_acc = input.edit_acc()
    # df_copy = transactions_df.data_view()
     new_trans = get_trans().copy()
+    orig_acc = new_trans.loc[new_trans["PK"] == int(pk_)]["account"].to_numpy()[0]
     orig_sub = new_trans.loc[new_trans["PK"] == int(pk_)]["subcat"].to_numpy()[0]
     orig_memo = new_trans.loc[new_trans["PK"] == int(pk_),"memo"].to_numpy()[0] 
     orig_cat = new_trans.loc[new_trans["PK"] == int(pk_)]["category"].to_numpy()[0]
-
+    orig_desc = new_trans.loc[new_trans["PK"] == int(pk_)]["desc"].to_numpy()[0]
+    print(f"Original row: PK {pk_} account:{orig_acc} Desc: {orig_desc} Memo:{orig_memo} cat:{orig_cat} subcat:{orig_sub}")
  #   df_copy.loc[df_copy["PK"] == int(pk_),"subcat"] = ed_sub
  #   df_copy.loc[df_copy["PK"] == int(pk_),"memo"] = ed_memo
  #   df_copy.loc[df_copy["PK"] == int(pk_),"category"] = ed_cat
     new_trans.loc[new_trans["PK"] == int(pk_),"subcat"] = ed_sub
     new_trans.loc[new_trans["PK"] == int(pk_),"memo"] = ed_memo
     new_trans.loc[new_trans["PK"] == int(pk_),"category"] = ed_cat
+    new_trans.loc[new_trans["PK"] == int(pk_),"account"] = ed_acc
     trans.set(new_trans) # trans is a reactive variable, called with trans.get() and trans.set() (use get_trans() to get the value not trans.get())
     credentials =  json.loads(os.environ["SERVICE_JSON"])
     gc = gspread.service_account_from_dict(credentials)
     sh = gc.open_by_key(S_KEY)
+    # omg what a stupid assumption. Find the PK first, then get the row number, merde. 
+
     worksheet =  sh.get_worksheet(0)
-    if (orig_sub != ed_sub ):
-        worksheet.update_cell(int(pk_), SUB_UPDATE,  ed_sub)
-    if (orig_memo != ed_memo ):
-        worksheet.update_cell(int(pk_), MEMO_UPDATE, ed_memo)
-    if (orig_cat != ed_cat ):
-        worksheet.update_cell(int(pk_), CAT_UPDATE,  ed_cat)
+    cell = worksheet.find(str(pk_),in_column=PK_COL)
+    if (cell):
+        row_num = cell.row
+        print(f"Going to update row {row_num} with PK {pk_} other info {cell}")
+        if (orig_sub != ed_sub ):
+            worksheet.update_cell(row_num, SUB_UPDATE,  ed_sub)
+        if (orig_memo != ed_memo ):
+            worksheet.update_cell(row_num, MEMO_UPDATE, ed_memo)
+        if (orig_cat != ed_cat ):
+            worksheet.update_cell(row_num, CAT_UPDATE,  ed_cat)
+        if (orig_acc != ed_acc ):
+            worksheet.update_cell(row_num, ACC_UPDATE,  ed_acc)
 
 @reactive.calc
 def calc_filtered_sum():
@@ -332,7 +343,7 @@ def get_pie_data():
         data["subcat"] = data["subcat"].apply(lambda x: None if x == "" else x)
         data["memo"] = data["memo"].apply(lambda x: None if x == "" else x)
         data['subcat'] = data.subcat.combine_first(data.memo)# when subcat is null, replace with memo first then desc
-        data['subcat'] = data.subcat.combine_first(data.desc)# when subcat is null, replace with desc
+        data['subcat'] = data.subcat.combine_first(data.desc)# if subcat is still null, replace with desc
         data = data.groupby('subcat')['amount'].sum().reset_index()
         data.amount = data.amount.apply(lambda negamt : abs(round( Decimal(negamt),2))) # pie positive numbers only
         data = data.rename(columns={'subcat': 'category'})
@@ -381,6 +392,7 @@ def on_row_selected():
     data_selected = transactions_df.data_view(selected=True)
     if  data_selected.empty:
         return
+    acc_ = data_selected["account"].to_numpy()[0]
     pk_ = data_selected["PK"].to_numpy()[0]
     desc_ = data_selected["desc"].to_numpy()[0]
     cat_ =  data_selected["category"].to_numpy()[0]
@@ -391,6 +403,8 @@ def on_row_selected():
     # Create a read-only input by adding the 'readonly' attribute
     #pk_input = ui.input_text("pk", "Primary Key:", value="TXN-90210")
     #pk_input.children[1].attrs.update({"readonly": "readonly"})
+    acc_input = ui.input_text("edit_acc", "Account", value=str(acc_))
+    acc_input.children[1].attrs.update({"readonly": "readonly"})
     pk_input = ui.input_text("edit_pk", "PK", value=str(pk_))
     pk_input.children[1].attrs.update({"readonly": "readonly"})
     amount_input =    ui.input_text("edit_amount", "Euros", value=str(amount_))
@@ -399,6 +413,7 @@ def on_row_selected():
     usd_input .children[1].attrs.update({"readonly": "readonly"})
     m = ui.modal(
         pk_input,
+        acc_input,
         ui.input_text("edit_desc", "Desc", value=desc_),
         ui.input_text("edit_memo", "Memo", value=memo_),
         ui.input_selectize("edit_cat", "Category", categories, selected = cat_),

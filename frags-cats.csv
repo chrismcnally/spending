@@ -7,6 +7,7 @@ ALDI,Groceries,64,ALDI
 LEV ATM 6519,Chris Cash Spending,61,
 E LECLERC,Groceries,53,LECLERK
 LEV ATM 0885,Hella Cash Spending,46,
+ATM-0045,Hella Cash Spending,1,
 MCDONALD,Restaurants/Dinner Take Out,44,
 Colegio Rainha,School Tuition and Fees,42,
 FARMACIA,Medical + Birth,40,Pharmacy
@@ -48,7 +49,7 @@ ASHLEY,Groceries,14,
 GOLDPET CALDAS,Pets,14,
 Disney,Media Subscriptions,14,
 BP CALDAS,Car/Gas/Tolls/Parking/repair,13,Gas
-GAUCHOS CALDAS,Restaurants/Dinner Take Out,13,
+GAUCHOS,Restaurants/Dinner Take Out,13,
 SPOTIFY,Media Subscriptions,13,
 SERVICO BP,Car/Gas/Tolls/Parking/repair,12,Gas
 VODAFOLISBOA,Google Fi + Cell phone,12,Vodafone
@@ -62,7 +63,6 @@ ESTACIONAMENT,Car/Gas/Tolls/Parking/repair,11,
 AGUA/GAS,Water Bill,11,
 SPDAD - Sociedade Portugu,Hella's Hobbies and Sports,11,
 UBER,"Uber, Lyft, Cabs, Car2Go, Public Transit, Bikeshare ",11,
-RNE,transit,10,
 ORTHOLINTO,Dental,10,Ortholinto
 HOSPITAL DA LUZ,Medical + Birth,10,
 HOSPITAL CUF ,Medical + Birth,10,
@@ -152,6 +152,7 @@ BALANCE CLUB,Fitness & Health Hacking,4,Balance
 HELP.HBOMAX.COM,Media Subscriptions,4,HBO Max
 TURTLECHAPTER,Hella Travel,4,
 ATM 0885,Hella Cash Spending,4,
+WASTE MANAGEMENT,2621 Expenses,4
 FLIXBUS.COM,transit,3,
 CRDL,School Tuition and Fees,3,
 DISPONIBILIZACAO,Legal & Administrative Fees,3,

@@ -333,7 +333,7 @@ work = [
     "outfile": "/Users/cmcnally/Dropbox/python/textfiles/categorized_Chase_Activity-20260115.csv",
     "do_atm": False,
     "do_cats": True,
-    "process": True,
+    "process": False,
     "writeFile": True,
     "account" : "Chase Sapphire"
   }
