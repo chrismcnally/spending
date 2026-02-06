@@ -16,6 +16,7 @@ MEMO_UPDATE = 6
 SUB_UPDATE = 12
 PK_UPDATE = 15
 
+# could read this from the spreadsheet, it's in the second sheet
 categories = ["Amazon -- already categorized individulally",
 "Bicycle Maintenance",
 "Birthdays, Christmas, Gifts, Parties",
