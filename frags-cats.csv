@@ -64,8 +64,8 @@ AGUA/GAS,Water Bill,11,
 SPDAD - Sociedade Portugu,Hella's Hobbies and Sports,11,
 UBER,"Uber, Lyft, Cabs, Car2Go, Public Transit, Bikeshare ",11,
 ORTHOLINTO,Dental,10,Ortholinto
-HOSPITAL DA LUZ,Medical + Birth,10,
-HOSPITAL CUF ,Medical + Birth,10,
+HOSPITAL DA LUZ,Medical + Birth,10,LUZ
+HOSPITAL CUF ,Medical + Birth,10,CUF
 BOWLING CALDAS,Restaurants/Dinner Take Out,10,
 McDonalds,Hella's Lunches/Fast Food,10,
 ELLINOPOULA,Lessons & Learning,10,
@@ -97,7 +97,7 @@ Amazon,Amazon -- already categorized individulally,7,
 REPSOL,Car/Gas/Tolls/Parking/repair,6,Gas
 CLINIMED,Medical + Birth,6,
 MONTEPIO,Medical + Birth,6,
-CUF TORRES VEDRAS,Medical + Birth,6,
+CUF TORRES VEDRAS,Medical + Birth,6,CUF
 KAYSDAKI,Restaurants/Dinner Take Out,6,
 CLUB PADEL,Chris Hobbies,6,
 LIU YUANYUAN,Caldas home wares etc,6,
@@ -113,7 +113,7 @@ A8 TORRES,Car/Gas/Tolls/Parking/repair,5,
 6519 A1 ,Car/Gas/Tolls/Parking/repair,5,
 PAG.IGCP,Income Taxes,5,
 SMAS CALDAS,Water Bill,5,
-HOSPITAL LUZ,Medical + Birth,5,
+HOSPITAL LUZ,Medical + Birth,5,LUZ
 SUPERMERCADO,Groceries,5,
 THE BLACK SHEEP PUB,Restaurants/Dinner Take Out,5,
 VINTAGE SPECTRUM,Restaurants/Dinner Take Out,5,Malaika
@@ -135,7 +135,7 @@ Vinted,Kids Clothing and Baby Gear,3,
 COLEGIO RAINHA,School Tuition and Fees,4,
 CORREIOS,Legal & Administrative Fees,4,
 DD PT61111450 CTT - AGUA/GAS,Water Bill,4,
-IHERB,Medical + Birth,4,Pharmacy
+IHERB,Groceries,4,vitamins
 PIZZA HUT,Restaurants/Dinner Take Out,4,
 WHAT THE FOLK,Hella's Lunches/Fast Food,4,
 SPORT ZONE VIVACI,Chris Hobbies,4,
@@ -184,7 +184,7 @@ ANNUAL MEMBERSHIP FEE,Legal & Administrative Fees,2,
 FIDELIDADE,Car/Gas/Tolls/Parking/repair,2,Insurance
 TAXACT,Income Taxes,2,
 VODAFONE,Google Fi + Cell phone,2,Vodafone
-HOSP CUF,Medical + Birth,2,
+HOSP CUF,Medical + Birth,2,CUF
  OPTICAS,Medical + Birth,2,Glasses/Contacts
 ALMAGEMEDICAL,Medical + Birth,2,
 WELL S ,Groceries,2,WELLS
@@ -202,7 +202,7 @@ QUINTA SENHORA DO ARRIO,Restaurants/Dinner Take Out,2,
 UNRWAUSA.ORG,Hella's Hobbies and Sports,2,
 Deporvillage,Hella's Hobbies and Sports,2,
 Strava Ireland Limited,Hella's Hobbies and Sports,2,
-CUF SANTAREM CAFE,Hella's Lunches/Fast Food,2,
+CUF SANTAREM CAFE,Hella's Lunches/Fast Food,2,CUF
 TRACA TRAPOS,Hella's Lunches/Fast Food,2,
 FIVE GUYS,Hella's Lunches/Fast Food,2,
 OASA ETICKET,Hellas Podcast,2,
@@ -556,7 +556,7 @@ CLINICA ESTEVAO,Medical + Birth,0,
 DRA MAFALDA JOANA SILVA FIGUEIRED,Medical + Birth,0,
 CLINICA PEDIATRICA,Medical + Birth,0,
 BRANCO LISBOA,Medical + Birth,0,Pharmacy
-CLINICA CUF,Medical + Birth,0,
+CLINICA CUF,Medical + Birth,0,CUF
 AGEAS PORTUGAL,Medical + Birth,0,
 LABETO,Medical + Birth,0,
 POSTO RZ CALDAS,Medical + Birth,0,

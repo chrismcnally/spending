@@ -138,6 +138,7 @@ with ui.sidebar():
 #    ui.input_date_range("inDateRange", "Input date", start="2024-11-01", end="2025-11-30")
     ui.input_radio_buttons("months_or_years","Summarize by:",["Year","Month"],selected = ["Year"])
     ui.input_radio_buttons("sort_by","Sort by:",["amount","Date","category"],selected = ["amount"])
+    ui.input_selectize("input_category","Filter Categories", choices = categories,selected=None,multiple=True)
 
 with ui.value_box(showcase=icon("piggy-bank")):
     "Total Euros"
@@ -365,18 +366,22 @@ def get_summary():
     year = input.input_year()
     sum_by = input.months_or_years()
     sort = input.sort_by()
+    cats = input.input_category()
     asc = True
     qstr  = buildFilter()
     if (year != "All Years"):
         qstr += "and year == '" + year  + "'"
-
+    if (cats and len(cats) > 0):
+        qstr += f" and category in {cats}"
     if (sum_by == "Month"):
         if (sort =="Date"):
             sort = "year_month"
+        print(f"query string is {qstr}")
         summary = get_trans().query(qstr).groupby(['category','year', 'year_month'])['amount'].sum().reset_index()
     else:   
         if (sort =="Date"):
             sort = "year"
+        print(f"query string is {qstr}")
         summary = get_trans().query(qstr).groupby(['category','year'])['amount'].sum().reset_index()
     summary = summary.sort_values(by=[sort,"year","category"],ascending=asc)
     return summary.round({'amount': 2, 'usd': 2})
