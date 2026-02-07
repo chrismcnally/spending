@@ -133,12 +133,12 @@ ui.tags.style("""
 """)
 with ui.sidebar():
     ui.input_selectize("input_year", "Years", choices=("All Years","2026","2025","2024","2023","2022","2021"), selected="All Years")
+    ui.input_selectize("input_category","Filter Categories", choices = categories,selected=None,multiple=True)
     ttypes = {"'D'":"Debit","'C'":"Credit","'T'":"Transfers","'P'":"Credit Card Payments","'I'":"Income"}
     ui.input_checkbox_group("types","Transaction Types",choices=ttypes,selected=(["'D'","'C'"]))
 #    ui.input_date_range("inDateRange", "Input date", start="2024-11-01", end="2025-11-30")
     ui.input_radio_buttons("months_or_years","Summarize by:",["Year","Month"],selected = ["Year"])
     ui.input_radio_buttons("sort_by","Sort by:",["amount","Date","category"],selected = ["amount"])
-    ui.input_selectize("input_category","Filter Categories", choices = categories,selected=None,multiple=True)
 
 with ui.value_box(showcase=icon("piggy-bank")):
     "Total Euros"
@@ -307,7 +307,7 @@ def get_pie_data():
         else:
             title = f"Year {input.input_year()}" 
             qstr = f"{qstr} and year == '{input.input_year()}'" 
-        summary = get_trans().query(qstr).copy()
+        summary = get_trans().query(qstr).copy() #shouldn't we just call get_summary()?
         summary = summary.groupby(['category'])['amount'].sum().reset_index()
         total = summary.amount.sum()
         summary.amount = summary.amount.apply(lambda negamt : abs(round( Decimal(negamt),2))) # pie positive numbers only
