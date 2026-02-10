@@ -1,12 +1,14 @@
 
 import json
-import os
 from datetime import datetime
 import time
 import csv
 import datetime
 from decimal import Decimal
 from operator import itemgetter
+import gspread 
+import os
+import pandas as pd
 
 # this is the transaction updater, adds categories, uses the file categories_updated.json 
 # which is a custom categories files, no longer YNAB, it has the field payee_includes with a 
@@ -14,6 +16,10 @@ from operator import itemgetter
 
 chris_cash_trans_payee = "6d265ca4-c546-42aa-8f0a-5aa7f4f5dda4"
 hella_cash_trans_payee = "842c01e5-6259-45ea-bf69-c623adb48132"
+S_KEY = "1ai9nZYCNw5g5-fv0-siPryHWYwl7hSfTunq5wswYfDo"
+HEADER = ["account","lance","dv","desc","category","memo","amount","newt","balance","usd","erate","subcat","fragment","who","PK"]
+
+
 
 amazon_off = True  # means we are not loading each amazon transaction, just going off YNAB already categorized, only for 2021 - 2023
 # for 2024 and beyond, using amazon files, we set this to false
@@ -119,7 +125,7 @@ def add_categories_df(trans, fragments = None, amazon_off=True):
     # report transactions that have no category?
     return trans
 
-# very old code to add categories, no longer running these as scripts everything called from read-cat.py
+# very old code to add categories, use above instead now. no longer running this file as a script everything now called from read-cat.py
 def add_categories(transactions, categories = None):
     if (not categories):
         categories = load_updated_categories()
@@ -242,6 +248,73 @@ def load_updated_categories(reset=False):
             cat["weight"] = 0
     return cats
 
+def open_sheet():
+    credentials =  json.loads(os.environ["SERVICE_JSON"])
+    gc = gspread.service_account_from_dict(credentials)
+    sh = gc.open_by_key(S_KEY)
+    worksheet =  sh.get_worksheet(0)
+    return worksheet
+
+def update_account(ts, account, useUSD=False,testRun=False):
+    # find in the sheet any matching rows from subset. if row found in sheet and does not have an account add in the account, 
+    # in the end write the whole sheet with just the acccount updated 
+    source = pd.DataFrame(ts)
+    worksheet = open_sheet()
+    origDb = worksheet.get_values()
+    origDb = pd.DataFrame(origDb[ 1 :], columns = HEADER) # skip the first row
+    count = len(source)
+    origDb['lance'] = origDb['lance'].astype(str)
+    origDb['amount'] = origDb['amount'].apply(lambda x: '' if x == '' else str('%.2f' %  float(x) ))
+    origDb['balance'] = origDb['balance'].apply(lambda x: '' if x == '' else str('%.2f' %  float(x) ))
+    source['amount'] = source['amount'].apply(lambda x: '' if x == '' else  str('%.2f' %  float(x) ))
+    source['balance'] = source['balance'].apply(lambda x: '' if x == '' else str('%.2f' %  float(x) ))
+    if (useUSD):
+        origDb['usd'] = origDb['usd'].apply(lambda x: '' if x == '' else str('%.2f' %  float(x) ))
+        source['usd'] = source['usd'].apply(lambda x: '' if x == '' else  str('%.2f' %  float(x) ))
+
+    # for rows in (source data) find a row int the sheet and update the account
+    for row in  source.itertuples(index=True):
+        index = row.Index
+        date = row.lance #.strftime('%Y-%m-%d')
+        #this can be done with ands instead of subsetting like this, original code only let you search the sheet by one column
+        matches = origDb.loc[origDb.lance == date]
+        if ("MBWAY WOO" in row.desc ):
+            print("found woo, what is happening")
+        if (len(matches) > 0):
+            if (useUSD):
+                subset = matches.loc[matches.usd == row.usd]
+            else:    
+                subset = matches.loc[matches.amount == row.amount]
+            if (len(subset) > 0):
+                anymore = subset.loc[subset.balance == row.balance]
+                if (len(anymore) == 1):
+                    # we have a single match
+                    pk = anymore["PK"].to_numpy()[0]
+                    old_acc = anymore["account"].to_numpy()[0]
+                    if (testRun):
+                        if (old_acc != account):
+                            print(f"Found {len(anymore)} matches had account {old_acc} will change to {account} PK {pk} lance: {row.lance} {row.desc} for {row.amount} balance {row.balance}")
+                    if (old_acc is None or old_acc == ""):
+                        print(f"adding account {account} to PK {pk} lance: {row.lance} {row.desc} for {row.amount} balance {row.balance}")
+                        origDb.loc[origDb['PK'] == pk, 'account'] = account
+                else:
+                    if (len(anymore) > 1):
+                        print(f"too many matches for lance: {row.lance} {row.desc} for E{row.amount} ${row.usd} balance {row.balance}")
+                    if (testRun):
+                        pk = anymore["PK"].to_numpy()[0]
+                        old_acc = anymore["account"].to_numpy()[0]
+                        if (old_acc != account):
+                            print(f"Found {len(anymore)} matches had account {old_acc} could change to {account}  PK {pk} lance: {row.lance} {row.desc} for {row.amount} balance {row.balance}")
+
+    # write the new set
+
+    rowcount = worksheet.row_count
+    trans = origDb.values.tolist()
+    range = f"A2:O{rowcount}"
+    if (not testRun):
+        worksheet.update(range_name=range,values=trans,value_input_option='USER_ENTERED')
+
+
 
 
 work = [
@@ -251,23 +324,32 @@ work = [
     "do_atm": True,
     "do_cats": True,
     "process": False,
-    "writeFile": True
+    "writeFile": True,
+    "update_acc" : True,
+    "useUSD" : False,
+    "account" : "Millenium"
   },
   {
     "infile": "/Users/cmcnally/Dropbox/python/textfiles/uncategorized-mil-2024-fixed.csv",
     "outfile": "/Users/cmcnally/Dropbox/python/textfiles/categorized-mil-2024.csv",
-    "do_atm": True,
-    "do_cats": True,
-    "process": False,
-    "writeFile": True
+    "do_atm": False,
+    "do_cats": False,
+    "process": True,
+    "writeFile": False,
+    "update_acc" : True,
+    "useUSD" : False,
+    "account" : "Millenium"
   },
   {
     "infile": "/Users/cmcnally/Dropbox/python/textfiles/uncategorized-chase-2024-2025.csv",
     "outfile": "/Users/cmcnally/Dropbox/python/textfiles/categorized-chase-2024-2025.csv",
     "do_atm": False,
-    "do_cats": True,
+    "do_cats": False,
     "process": False,
-    "writeFile": True
+    "writeFile": False,
+    "update_acc" : True,
+    "useUSD" : True,
+    "account" : "Chase Sapphire"
   },
   {
     "infile": "/Users/cmcnally/Dropbox/python/textfiles/categorized-amazon-2024-2025.csv",
@@ -280,43 +362,57 @@ work = [
     {
     "infile": "/Users/cmcnally/Dropbox/python/textfiles/test_milen-2023.csv",
     "outfile": "/Users/cmcnally/Dropbox/python/textfiles/test-milen-2023-categorized.csv",
-    "do_cats": True,
+    "do_cats": False,
     "do_atm": False,
     "process": False,
-    "writeFile": True
+    "writeFile": False,
+    "update_acc" : True,
+    "useUSD" : False,
+    "account" : "Millenium"
   },
    {
     "infile": "/Users/cmcnally/Dropbox/python/textfiles/test_chase-2023-2021.csv",
     "outfile": "/Users/cmcnally/Dropbox/python/textfiles/test_chase-2023-2021-categorized.csv",
-    "do_cats": True,
+    "do_cats": False,
     "do_atm": False,
     "process": False,
-    "writeFile": True
+    "writeFile": False,
+    "update_acc" : True,
+    "useUSD" : True,
+    "account" : "Chase Sapphire"
   },
      {
     "infile": "/Users/cmcnally/Dropbox/python/textfiles/test_ally-bank-2023-2021.csv",
     "outfile": "/Users/cmcnally/Dropbox/python/textfiles/test_ally-bank-2023-2021-categorized.csv",
-    "do_cats": True,
+    "do_cats": False,
     "do_atm": False,
     "process": False,
-    "writeFile": True
+    "writeFile": False,
+    "account": "ally-1051307708",
+    "update_acc" : True,
+    "useUSD" : True
   },
   # ancillary were  the end of 12/2025 and 11 and 12 from 2023 which I found, all from Millenium
     {
     "infile": "/Users/cmcnally/Dropbox/python/textfiles/uncategorized-ancillary-mixed.csv",
     "outfile": "/Users/cmcnally/Dropbox/python/textfiles/categorized-ancillary-mixed.csv",
     "do_atm": False,
-    "do_cats": True,
+    "do_cats": False,
     "process": False,
-    "writeFile": True
+    "writeFile": False,
+    "update_acc" : True,
+    "useUSD" : False,
+    "account" : "Millenium"
   },
    { # these were transactions from 2024 milenium pdf reads that were skipped by the pdf reader
     "infile": "/Users/cmcnally/Dropbox/python/textfiles/converted_FIXED-milen-2024.csv",
     "outfile": "/Users/cmcnally/Dropbox/python/textfiles/categorized-converted_FIXED-milen-2024.csv",
     "do_atm": False,
-    "do_cats": True,
+    "do_cats": False,
     "process": False,
-    "writeFile": True,
+    "writeFile": False,
+    "update_acc" : True,
+    "useUSD" : False,
     "account" : "Millenium"
   },
    { 
@@ -351,6 +447,8 @@ if __name__ == "__main__":
     for w in work:
         if (w["process"]):
             transactions = load_csv_trans(w["infile"])
+            if w["update_acc"]:
+                update_account(transactions,w["account"],w["useUSD"])
             if w["do_cats"]:
                 transactions = add_categories(transactions, category_list)
             if w["do_atm"]:

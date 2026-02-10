@@ -12,6 +12,41 @@ PATH_F = "/Users/cmcnally/Dropbox/python/textfiles/"
 S_KEY = "1ai9nZYCNw5g5-fv0-siPryHWYwl7hSfTunq5wswYfDo"
 HEADER = ["account","lance","dv","desc","category","memo","amount","newt","balance","usd","erate","subcat","fragment","who","PK"]
 
+
+def easy_assign_accounts():
+    millenium = ["COMPRA 2860",
+                 "COMPRA 6253",
+                 "COMPRA 6519",
+                 "COMPRA 7455",
+                 "COMPRA 7482",
+                 "COMPRA 9496",
+                 "COMPRA 0885",
+                 "LEV ATM 0885",
+                 "LEV ATM 2860",
+                 "LEV ATM 6253",
+                 "LEV ATM 6519",
+                 "LEV ATM 7455",
+                 "LEV ATM 7482",
+                 "LEV ATM 9496",
+                 "TRF MB WAY",
+                 "COMISSAO TRF",
+                 "Cleaning Clara",
+                 "IMPOSTO DO SELO"]
+    worksheet = open_sheet()
+    origDb = worksheet.get_values()
+    origDb = pd.DataFrame(origDb[ 1 :], columns = HEADER) # skip the first row
+
+    before = len(origDb.loc[origDb["account"] is None or origDb["account"] == ""])
+    origDb.loc[origDb['desc'].str.contains(r'^(?:' + '|'.join(millenium) + ')', na=False), 'account'] = "Millenium"
+    after = len(origDb.loc[origDb["account"] is None or origDb["account"] == ""])
+    rstr = r'^(?:' + '|'.join(millenium) + ')'
+   
+    print(f"updates {before - after} rows")
+    rowcount = worksheet.row_count
+    trans = origDb.values.tolist()
+    range = f"A2:O{rowcount}"
+    worksheet.update(range_name=range,values=trans,value_input_option='USER_ENTERED')
+
 def open_sheet():
     credentials =  json.loads(os.environ["SERVICE_JSON"])
     gc = gspread.service_account_from_dict(credentials)
@@ -28,6 +63,7 @@ def clean_dupes(origDb, newRows):
         keep='first'
     ).iloc[len(origDb):] # the colon here means all the rows AFTER the top dataset, origDb
     return df_new_cleaned
+
 
 def old_dedupe(dataf,useUSD=False):
     # reworked this to go to the worksheet once, load to a dataframe and do all checking client side,
@@ -46,7 +82,7 @@ def old_dedupe(dataf,useUSD=False):
         origDb['usd'] = origDb['usd'].apply(lambda x: '' if x == '' else str('%.2f' %  float(x) ))
         dataf['usd'] = dataf['usd'].apply(lambda x: '' if x == '' else  str('%.2f' %  float(x) ))
 
-    # dataf.drop(drops) where drops is rows [0,1,2]
+    # dataf.drop(drops) where drops is rows [0,1,2] drop rows in dataf (new data) that's already in origDb
     for row in  dataf.itertuples(index=True):
         index = row.Index
         date = row.lance.strftime('%Y-%m-%d')
@@ -79,6 +115,7 @@ def write_to_sheet(dataf,worksheet=None):
     dataf['PK'] = list(range(next_pk + 1,next_pk + len(dataf)+1) )
     #header = ["account","lance","dv","de   sc","category","memo","amount","newt","balance","usd","erate","subcat","fragment","who","PK"]
     dataf = dataf[HEADER] # puts them in the right order
+    dataf = dataf.fillna('')
     trans =  dataf.values.tolist()
     worksheet.insert_rows(trans,row=2,value_input_option='USER_ENTERED')
     #worksheet.sort((1, 'des'), (0, 'asc'))
@@ -88,16 +125,7 @@ def handle_millenium(file):
     dataf = mil.initOtherColumns(dataf)
     dataf = mil.fix_credits(dataf)
     dataf = cat.add_categories_df(dataf)
-    # write to the spreadsheet appending new rows. maybe check for duplicates too yay!
-    #worksheet = open_sheet()
-    #origDb = worksheet.get_values()
-    #origDb = pd.DataFrame(origDb[ 1 :], columns = header) # skip the first row
-
-    #print(f"the spreadsheet currently has {worksheet.row_count} rows")
-    #count = len(dataf)
     dataf = old_dedupe(dataf)
-    #newCount = len(dataf)
-    #print(f"Eliminated {count - newCount} duplicate rows out of {count} rows")
     write_to_sheet(dataf)
 
 def handle_chase(file):
@@ -110,6 +138,18 @@ def handle_chase(file):
 def handle_schwab(file,account):
     dataf = chase.read_schwab(file)
     dataf = chase.add_schwab_fields(dataf,account)
+    dataf = cat.add_categories_df(dataf)
+    dataf = old_dedupe(dataf,useUSD=True)
+    write_to_sheet(dataf)
+
+def handle_schwab_from_ynab(file,account):
+#    dataf = chase.read_schwab(file)
+#    dataf = chase.add_schwab_fields(dataf,account)
+
+    pathf = "/Users/cmcnally/Dropbox/python/textfiles/" + file
+    dataf = pd.read_csv(pathf, delimiter=",", engine='python',header=0,
+          parse_dates=['lance','dv'], dayfirst=False) 
+
     dataf = cat.add_categories_df(dataf)
     dataf = old_dedupe(dataf,useUSD=True)
     write_to_sheet(dataf)
@@ -133,3 +173,7 @@ file = "ally_1051307708_2025.csv"
 #handle_ally(file,"ally-1051307708")
 file = "ally_sav-mc-combo-2025.csv"
 #handle_ally(file,"ally-2151307713-2190559050")
+# fix accounts 
+#easy_assign_accounts()
+file = "test_schwab_2022.csv"
+handle_schwab_from_ynab(file,"Sch-Checking-751")

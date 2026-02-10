@@ -132,7 +132,7 @@ ui.tags.style("""
     }
 """)
 with ui.sidebar():
-    ui.input_selectize("input_year", "Years", choices=("All Years","2026","2025","2024","2023","2022","2021"), selected="All Years")
+    ui.input_selectize("input_year", "Years", choices=("All Years","2026","2025","2024","2023","2022","2021"), selected="All Years", multiple=True)
     ui.input_selectize("input_category","Filter Categories", choices = categories,selected=None,multiple=True)
     ttypes = {"'D'":"Debit","'C'":"Credit","'T'":"Transfers","'P'":"Credit Card Payments","'I'":"Income"}
     ui.input_checkbox_group("types","Transaction Types",choices=ttypes,selected=(["'D'","'C'"]))
@@ -263,8 +263,9 @@ def filtered_df():
     # filter by transaction type
     qstr = buildFilter()
     # filter by years
-    if not input.input_year() in ["All Years"]:
-        qstr += " and year == '" + input.input_year() + "'"
+    years = input.input_year()
+    if (years and len(years) > 0 and "All Years" not in years):
+        qstr += f" and year in {years} " 
     alltrans = alltrans.query(qstr)
     if ( data_selected.empty):
         sort = input.sort_by()
@@ -302,11 +303,12 @@ def get_pie_data():
     data_selected = summary_df.data_view(selected=True)
     if ( data_selected.empty):
         qstr = buildFilter()    
-        if input.input_year() in ["All Years"]:
+        years = input.input_year()
+        if "All Years" in years:
             title = "All Years"
         else:
-            title = f"Year {input.input_year()}" 
-            qstr = f"{qstr} and year == '{input.input_year()}'" 
+            title = f"Year {years}" 
+            qstr = f"{qstr} and year in {years}" 
         summary = get_trans().query(qstr).copy() #shouldn't we just call get_summary()?
         summary = summary.groupby(['category'])['amount'].sum().reset_index()
         total = summary.amount.sum()
@@ -363,14 +365,16 @@ def get_pie_data():
 @reactive.calc
 def get_summary():
 #    dates = input.inDateRange()
-    year = input.input_year()
+    years = input.input_year()
     sum_by = input.months_or_years()
     sort = input.sort_by()
     cats = input.input_category()
     asc = True
-    qstr  = buildFilter()
-    if (year != "All Years"):
-        qstr += "and year == '" + year  + "'"
+    qstr  = buildFilter()     
+    if (years and len(years) > 0) and "All Years" not in years:
+        qstr += f" and year in {years}"
+#    if (year != "All Years"):
+#        qstr += "and year == '" + year  + "'"
     if (cats and len(cats) > 0):
         qstr += f" and category in {cats}"
     if (sum_by == "Month"):
