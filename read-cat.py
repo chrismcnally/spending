@@ -164,9 +164,11 @@ def handle_ally(file,account):
 
 
 file = "Portuguese-bank-feb-2026-partial.csv"
+file = "Portuguese-bank-partial-february.csv"
 #handle_millenium(file)
 file = "Chase5869_Activity_20251231.csv"
-#handle_chase(file)
+file = "Chase-partial-february.csv"
+handle_chase(file)
 file = "Schwab_751_Checking_31012026.csv"
 #handle_schwab(file,"Sch-Checking-751")
 #handle_schwab(file,"Sch-192-Rosemary")
@@ -174,7 +176,7 @@ file = "ally_1051307708_2025.csv"
 #handle_ally(file,"ally-1051307708")
 file = "ally_sav-mc-combo-2025.csv"
 file = "ally-sav-mcnally-2024.csv"
-handle_ally(file,"ally-2151307713-2190559050")
+#handle_ally(file,"ally-2151307713-2190559050")
 # fix accounts 
 #easy_assign_accounts()
 file = "test_schwab_2022.csv"
