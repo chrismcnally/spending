@@ -7,6 +7,7 @@ import gspread
 import json
 import os
 import pandas as pd
+import itertools
 
 PATH_F = "/Users/cmcnally/Dropbox/python/textfiles/"
 S_KEY = "1ai9nZYCNw5g5-fv0-siPryHWYwl7hSfTunq5wswYfDo"
@@ -115,7 +116,7 @@ def write_to_sheet(dataf,worksheet=None):
     dataf['PK'] = list(range(next_pk + 1,next_pk + len(dataf)+1) )
     #header = ["account","lance","dv","de   sc","category","memo","amount","newt","balance","usd","erate","subcat","fragment","who","PK"]
     dataf = dataf[HEADER] # puts them in the right order
-    dataf = dataf.fillna('')
+    dataf = dataf.fillna('') # MAYBE THIS SHOULD BE 0 OR 0.0 i was getting Nan in the amount column for usd transactions
     trans =  dataf.values.tolist()
     worksheet.insert_rows(trans,row=2,value_input_option='USER_ENTERED')
     #worksheet.sort((1, 'des'), (0, 'asc'))
@@ -172,8 +173,9 @@ file = "Schwab_751_Checking_31012026.csv"
 file = "ally_1051307708_2025.csv"
 #handle_ally(file,"ally-1051307708")
 file = "ally_sav-mc-combo-2025.csv"
-#handle_ally(file,"ally-2151307713-2190559050")
+file = "ally-sav-mcnally-2024.csv"
+handle_ally(file,"ally-2151307713-2190559050")
 # fix accounts 
 #easy_assign_accounts()
 file = "test_schwab_2022.csv"
-handle_schwab_from_ynab(file,"Sch-Checking-751")
+#handle_schwab_from_ynab(file,"Sch-Checking-751")

@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import gspread 
 import os
 import json
+import itertools
 
 S_KEY = "1ai9nZYCNw5g5-fv0-siPryHWYwl7hSfTunq5wswYfDo"
 PK_COL = 15
@@ -16,7 +17,8 @@ MEMO_UPDATE = 6
 SUB_UPDATE = 12
 PK_UPDATE = 15
 
-# could read this from the spreadsheet, it's in the second sheet
+# could read this from the spreadsheet, it's in the named range 'categories'
+
 categories = ["Amazon -- already categorized individulally",
 "Bicycle Maintenance",
 "Birthdays, Christmas, Gifts, Parties",
@@ -70,7 +72,6 @@ categories = ["Amazon -- already categorized individulally",
 "Stuff I Forgot to Budget For",
 "Portugal Relocation Project",
 "Mortgage"]
-
 # old code to load from the file, using a spreadsheet now
 def load_categorized_trans():
     #trans =  pd.read_csv("textfiles/categorized-all-2024-2025.csv")
@@ -90,12 +91,24 @@ def load_categorized_trans():
    # trans['amount'] = trans['amount'].astype(float)
  
     return  trans.sort_values(by=['year', 'year_month','category'])   
-def load_trans_from_gsheet():
-    # json.loads(os.environ["GSPREAD_CREDS_JSON"])
+def open_sheet():
     credentials =  json.loads(os.environ["SERVICE_JSON"])
     gc = gspread.service_account_from_dict(credentials)
     sh = gc.open_by_key(S_KEY)
     worksheet =  sh.get_worksheet(0)
+    return worksheet
+
+def load_categories():
+
+    worksheet = open_sheet()
+    cats = worksheet.get("categories")
+    cats = list(itertools.chain.from_iterable(cats))
+    return cats
+
+CATEGORIES = load_categories()
+
+def load_trans_from_gsheet():
+    worksheet = open_sheet()
     trans = pd.DataFrame(worksheet.get_all_records())
     print(f"the spreadsheet currently has {worksheet.row_count} rows")
     # this won't work anymore, unless we replace empty string with None
@@ -132,8 +145,9 @@ ui.tags.style("""
     }
 """)
 with ui.sidebar():
+#    categories = load_categories()
     ui.input_selectize("input_year", "Years", choices=("All Years","2026","2025","2024","2023","2022","2021"), selected="All Years", multiple=True)
-    ui.input_selectize("input_category","Filter Categories", choices = categories,selected=None,multiple=True)
+    ui.input_selectize("input_category","Filter Categories", choices = CATEGORIES,selected=None,multiple=True)
     ttypes = {"'D'":"Debit","'C'":"Credit","'T'":"Transfers","'P'":"Credit Card Payments","'I'":"Income"}
     ui.input_checkbox_group("types","Transaction Types",choices=ttypes,selected=(["'D'","'C'"]))
 #    ui.input_date_range("inDateRange", "Input date", start="2024-11-01", end="2025-11-30")
@@ -380,12 +394,12 @@ def get_summary():
     if (sum_by == "Month"):
         if (sort =="Date"):
             sort = "year_month"
-        print(f"query string is {qstr}")
+#        print(f"query string is {qstr}")
         summary = get_trans().query(qstr).groupby(['category','year', 'year_month'])['amount'].sum().reset_index()
     else:   
         if (sort =="Date"):
             sort = "year"
-        print(f"query string is {qstr}")
+#        print(f"query string is {qstr}")
         summary = get_trans().query(qstr).groupby(['category','year'])['amount'].sum().reset_index()
     summary = summary.sort_values(by=[sort,"year","category"],ascending=asc)
     return summary.round({'amount': 2, 'usd': 2})
@@ -426,7 +440,7 @@ def on_row_selected():
         acc_input,
         ui.input_text("edit_desc", "Desc", value=desc_),
         ui.input_text("edit_memo", "Memo", value=memo_),
-        ui.input_selectize("edit_cat", "Category", categories, selected = cat_),
+        ui.input_selectize("edit_cat", "Category", CATEGORIES, selected = cat_),
         ui.input_text("edit_sub", "Subcategory", value=sub_),
         amount_input,
         usd_input, 

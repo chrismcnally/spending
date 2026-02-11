@@ -18,11 +18,92 @@ chris_cash_trans_payee = "6d265ca4-c546-42aa-8f0a-5aa7f4f5dda4"
 hella_cash_trans_payee = "842c01e5-6259-45ea-bf69-c623adb48132"
 S_KEY = "1ai9nZYCNw5g5-fv0-siPryHWYwl7hSfTunq5wswYfDo"
 HEADER = ["account","lance","dv","desc","category","memo","amount","newt","balance","usd","erate","subcat","fragment","who","PK"]
-
+PK_COL = 15
 
 
 amazon_off = True  # means we are not loading each amazon transaction, just going off YNAB already categorized, only for 2021 - 2023
 # for 2024 and beyond, using amazon files, we set this to false
+monthly_ex_rates = {   
+    # 2022
+    "202201": (1.130000, 0.884956),
+    "202202": (1.120000, 0.892857),
+    "202203": (1.110000, 0.900901),
+    "202204": (1.090000, 0.917431),
+    "202205": (1.070000, 0.934579),
+    "202206": (1.060000, 0.943396),
+    "202207": (1.020000, 0.980392),
+    "202208": (1.010000, 0.990099),
+    "202209": (0.990000, 1.010101),
+    "202210": (0.980000, 1.020408),
+    "202211": (1.030000, 0.970874),
+    "202212": (1.060000, 0.943396),
+
+        # 2023
+    "202301": (1.080000, 0.925926),
+    "202302": (1.070000, 0.934579),
+    "202303": (1.090000, 0.917431),
+    "202304": (1.100000, 0.909091),
+    "202305": (1.080000, 0.925926),
+    "202306": (1.090000, 0.917431),
+    "202307": (1.110000, 0.900901),
+    "202308": (1.090000, 0.917431),
+    "202309": (1.060000, 0.943396),
+    "202310": (1.060000, 0.943396),
+    "202311": (1.090000, 0.917431),
+    "202312": (1.100000, 0.909091),
+"202401" :	(1.091126, 0.916507 ),
+"202402" :	(1.079318, 0.926522 ),
+"202403" : 	(1.087005, 0.919976 ),
+"202404" :	(1.072285, 0.932636 ),
+"202405" : 	(1.081664, 0.924524 ),
+"202406" : 	(1.076247, 0.92919 ),
+"202407" :	(1.085428, 0.921315 ),
+"202408" : 	(1.102099, 0.907444 ),
+"202409" :	(1.110919, 0.900173 ), 
+"202410" : 	(1.089561, 0.91785 ),
+"202411" : 	(1.062408, 0.94144 ),
+"202412" : (1.047744, 0.954469 ),
+"202501" :	(1.035875, 0.965434 ),
+"202502" :	(1.041557, 0.960138 ),
+"202503" : 	(1.08043, 0.925734 ),
+"202504" :	(1.123274, 0.890543 ),
+"202505" : 	(1.127774, 0.886745 ),
+"202506" : 	(1.15293, 0.867441 ),
+"202507" :	(1.168078, 0.856157 ),
+"202508" : 	(1.165494, 0.858019 ),
+"202509" :	(1.173437, 0.852212 ),
+"202510" : 	(1.164413, 0.858819 ),
+"202511" : 	(1.156707, 0.864535 ),
+"202512" :  (1.168906, 0.85552),
+"202601" :  (1.178419, 0.848595), # 1.169317119  0.8552 our last transfer on, switch to mid transfer
+"202602" :  (1.191185, 0.8395) # also from our last transfer on 2/2
+}
+
+def add_amount_if_none():
+    worksheet = open_sheet()
+    valarray = worksheet.get_values()
+    dataf = pd.DataFrame(valarray[ 1 :], columns = HEADER) # skip the first row
+    dataf['usd'] = dataf['usd'].astype(float,errors="ignore")
+    dataf = dataf.loc[(dataf["amount"] == '0' ) &    (dataf["usd"] < 0) & (dataf["newt"].isin(['D','C']))].copy()
+    dataf['amount'] = dataf['amount'].astype(float,errors="ignore")
+    #dataf['amount'] = dataf['amount'].astype(float,errors="ignore")
+    dataf["year_month"] = dataf.dv.apply(lambda x : x[0:4] + x[5:7])
+    dataf["erate"] = dataf["year_month"].apply(lambda key :  monthly_ex_rates[key][0])
+    dataf['erate'] = dataf['erate'].astype(float,errors="ignore")
+#    dataf['usd'] = dataf.usd.apply(lambda x :round( Decimal(x),2)) # make amount a decimal instead of float and 
+    dataf["amount"] = dataf["erate"].astype(float) *  dataf["usd"].astype(float)
+    # we have to updat the amount fields for these 21 rows. must sleep a little to keep google from getting angry
+    dataf = dataf[HEADER] # puts them in the right order
+    for row in  dataf.itertuples(index=True):
+        pk = row.PK
+        cell = worksheet.find(pk,in_column=PK_COL)
+        row_num =  cell.row
+        celln = f"G{row_num}"
+        print(f"will update row G{row_num}  with PK {pk} old amount 0 new amount {row.amount}")
+        worksheet.update(range_name=celln, values=[[row.amount]], raw=False)
+#        worksheet.update(f"A{row_num}:O{row_num}",row.values(),value_input_option='USER_ENTERED')
+        time.sleep(2)
+
 def find_unique_payees(transactions):
     payees = {}
     for trans in transactions.data.transactions:
@@ -334,7 +415,7 @@ work = [
     "outfile": "/Users/cmcnally/Dropbox/python/textfiles/categorized-mil-2024.csv",
     "do_atm": False,
     "do_cats": False,
-    "process": True,
+    "process": False,
     "writeFile": False,
     "update_acc" : True,
     "useUSD" : False,
@@ -442,7 +523,7 @@ if __name__ == "__main__":
     reformat_categories()
     category_list = load_updated_categories(False)  
     # where is the amazon?
-
+#    add_amount_if_none()
     all_trans =[]        
     for w in work:
         if (w["process"]):
