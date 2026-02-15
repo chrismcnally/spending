@@ -153,6 +153,9 @@ HELP.HBOMAX.COM,Media Subscriptions,4,HBO Max
 TURTLECHAPTER,Hella Travel,4,
 ATM 0885,Hella Cash Spending,4,
 Union Bank,Mortgage,6,
+US BANK HOME,Mortgage,6,
+US Bank Home Mtg,Mortgage,6,
+Farmers Ins,Home Insurance,3
 WASTE MANAGEMENT,2621 Expenses,4
 FLIXBUS.COM,transit,3,
 CRDL,School Tuition and Fees,3,
@@ -259,6 +262,15 @@ SUNNY,GADGETS,2,
 NORD* VPN,GADGETS,2,
 APPLE.COM/US,GADGETS,2,
 Worten,GADGETS,2,
+SCRIBD,GADGETS,6,SCRIBD
+MICROSOFT,GADGETS,6,MICROSOFT
+ANCESTRY,GADGETS,6,ANCESTRY
+OPENAI,GADGETS,3,CHATGPT
+POLITEIA BOOKS,"Books, mostly hella",1,529
+CAITLIN L HEINZ,2621 Income,9,
+HILARY OBRIEN,2621 Income,9,
+Caitlin L Heinz,2621 Income,9,
+Hilary Obrien,2621 Income,9,
 VASILOPOULOS,Hella Travel,2,
 VIVLIOPOLIO,Hella Travel,2,
 ATHENS AUTHENTIC MAR,Hella Travel,2,
@@ -333,6 +345,7 @@ A CASA ALCOBACA,Restaurants/Dinner Take Out,1,
 CASA DO BINGRE,Restaurants/Dinner Take Out,1,
 PIZZARIA LA PIAZZA,Restaurants/Dinner Take Out,1,
 Fogo e Sabor,Restaurants/Dinner Take Out,1,
+CROCHET HOOK,Hella's Hobbies and Sports,1,
 ETNAGA CONS,Hella's Hobbies and Sports,1,
 RUPO DESPORTIVO CONCHA AZU,Hella's Hobbies and Sports,1,
 HOTEL JERONIMOS,Hella's Hobbies and Sports,1,
@@ -550,6 +563,10 @@ M COUTINHO OESTE,Car/Gas/Tolls/Parking/repair,0,Repair
 DD OCIDENTAL AUTOMVEL,Car/Gas/Tolls/Parking/repair,0,Insurance
 REEMBOLSOS   IRS,Income Taxes,0,
 158370002152428,Income Taxes,0,
+ALAMEDA COUNTY,Real Estate Tax,6,
+TAX PMTS ONLINE,Real Estate Tax,6,
+Pty Tax Pmts Online,Real Estate Tax,6,
+Bookstore Polite,"Books, mostly hella",3,
 TRANSFERENCIA P/O EDP,Electric,0,
 PAG.xxxx8947 - MEO/TMN,Google Fi + Cell phone,0,Meo
 VODAFO,Google Fi + Cell phone,0,
@@ -805,6 +822,7 @@ WORTEN,GADGETS,0,
 TAXIS ARISTIDES,"Uber, Lyft, Cabs, Car2Go, Public Transit, Bikeshare ",0,
  ATHENS,Hella Travel,0,
  ATHINA,Hella Travel,0,
+SYSTEGASMENA,Hella Travel,1,
 Freenow Raauz,Hella Travel,0,
 DUTY FREE SHOPS SPATA,Hella Travel,0,
 SPATA,Hella Travel,0,
