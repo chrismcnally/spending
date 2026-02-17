@@ -162,13 +162,26 @@ def handle_ally(file,account):
     dataf = old_dedupe(dataf,useUSD=True)
     write_to_sheet(dataf)
 
+def handle_WellsFargo(file_csv,file_scraped):
+    datascraped = chase.read_wellsFargo_scraped(file_scraped)
+    datascraped["account"] = "Wells-Fargo"
+    datacsv = chase.read_wellsFargo_csv(file_csv)
+    datacsv["newt"]= "D"
+    datacsv = chase.add_euro_other_fields_wf(datacsv,"Wells-Fargo")
+    datascraped = chase.add_euro_other_fields_wf(datascraped,"Wells-Fargo")
+    # dataf = dataf[HEADER] #to put them in order, but this has PK so HEADER.remove("PK")
+    # dataf = dataf[HEADER]
+    dataf = pd.concat([datacsv,datascraped], ignore_index=True)
+    dataf = cat.add_categories_df(dataf)
+    dataf = old_dedupe(dataf,useUSD=True)
+    write_to_sheet(dataf)
 
 file = "Portuguese-bank-feb-2026-partial.csv"
 file = "Portuguese-bank-partial-february.csv"
 #handle_millenium(file)
 file = "Chase5869_Activity_20251231.csv"
 file = "Chase-partial-february.csv"
-handle_chase(file)
+#handle_chase(file)
 file = "Schwab_751_Checking_31012026.csv"
 #handle_schwab(file,"Sch-Checking-751")
 #handle_schwab(file,"Sch-192-Rosemary")
@@ -181,3 +194,4 @@ file = "ally-sav-mcnally-2024.csv"
 #easy_assign_accounts()
 file = "test_schwab_2022.csv"
 #handle_schwab_from_ynab(file,"Sch-Checking-751")
+handle_WellsFargo("Wells-Fargo.csv","converted_Wells_Fargo_PDFS_pass_2.csv")
