@@ -10,10 +10,13 @@ LEV ATM 0885,Hella Cash Spending,46,
 ATM-0045,Hella Cash Spending,1,
 MCDONALD,Restaurants/Dinner Take Out,44,
 Colegio Rainha,School Tuition and Fees,42,
+CORREIA ROSA,Medical + Birth,40,Pharmacy
 FARMACIA,Medical + Birth,40,Pharmacy
+BEN HARRY CLEGG,Medical + Birth,40,Hella Dr
 IMPOSTO DO SELO,Legal & Administrative Fees,39,
 IMPOSTO DO SELO,Legal & Administrative Fees,39,
 MINIPRECO,Groceries,36,MINIPRECO
+ANDREIA ALEXANDRA GOMES MENDES,"Children's Enrichment Classes",36,Dr. Andreia
 CHILDREN S,"Children's Enrichment Classes",36,Dr. Andreia
 ****4493,Lessons & Learning,33,IRIS
 MIGUEL MEXIA,Groceries,29,Mexia
@@ -86,6 +89,7 @@ UNITED      0162367927938,Family Vacations,1,
 UNITED      0164364660306,Family Vacations,1,
 AIRBNB * HMNAPBATKM,Family Vacations,1,
 LEVALLOIS-PERRET,Hella Travel,8,
+SNBRSSLSAIR,Hella Travel,1,
 AEGEAN,Hella Travel,8,
 COMPRA 0885 Vinted,Fraud,8,
 JOAQUIM CHAVES,Medical + Birth,7,Blood Tests
@@ -818,6 +822,7 @@ MEDIOESTE,Media Subscriptions,0,
 Max.com,Media Subscriptions,0,HBO Max
 Netflix,Media Subscriptions,0,Netflix
 Dropbox,GADGETS,0,
+GOOGLE PAYMENT IRELAND LTD. IAT PAYPAL,GADGETS,1,Evernote
 WORTEN,GADGETS,0,
 TAXIS ARISTIDES,"Uber, Lyft, Cabs, Car2Go, Public Transit, Bikeshare ",0,
  ATHENS,Hella Travel,0,

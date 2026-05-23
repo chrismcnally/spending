@@ -136,6 +136,18 @@ def handle_chase(file):
     dataf = old_dedupe(dataf,useUSD=True)
     write_to_sheet(dataf)
 
+def handle_amazon(file):
+    dataf = chase.read_amazon_euros(file)
+    dataf["lance"] = dataf.lance.apply(lambda x : x.date().strftime("%Y-%m-%d"))
+    dataf["lance"] = pd.to_datetime(dataf["lance"], format="%Y-%m-%d")
+    dataf["dv"] = dataf["lance"]   
+    dataf = chase.add_usd_other_fields(dataf)
+
+    dataf["amount"] = dataf["amount"].map(lambda x: f"{x:.2f}")
+    dataf["usd"] = dataf["usd"].map(lambda x: f"{x:.2f}")
+    dataf["account"] = "Chase Sapphire"
+    write_to_sheet(dataf)
+
 def handle_schwab(file,account):
     dataf = chase.read_schwab(file)
     dataf = chase.add_schwab_fields(dataf,account)
@@ -163,35 +175,54 @@ def handle_ally(file,account):
     write_to_sheet(dataf)
 
 def handle_WellsFargo(file_csv,file_scraped):
-    datascraped = chase.read_wellsFargo_scraped(file_scraped)
-    datascraped["account"] = "Wells-Fargo"
+    if (file_scraped):
+        datascraped = chase.read_wellsFargo_scraped(file_scraped)
+        datascraped["account"] = "Wells-Fargo"
+        datascraped = chase.add_euro_other_fields_wf(datascraped,"Wells-Fargo")
     datacsv = chase.read_wellsFargo_csv(file_csv)
     datacsv["newt"]= "D"
     datacsv = chase.add_euro_other_fields_wf(datacsv,"Wells-Fargo")
-    datascraped = chase.add_euro_other_fields_wf(datascraped,"Wells-Fargo")
     # dataf = dataf[HEADER] #to put them in order, but this has PK so HEADER.remove("PK")
     # dataf = dataf[HEADER]
-    dataf = pd.concat([datacsv,datascraped], ignore_index=True)
+    if (file_scraped):
+        dataf = pd.concat([datacsv,datascraped], ignore_index=True)
+    else:
+        dataf = datacsv
     dataf = cat.add_categories_df(dataf)
     dataf = old_dedupe(dataf,useUSD=True)
     write_to_sheet(dataf)
 
-file = "Portuguese-bank-feb-2026-partial.csv"
-file = "Portuguese-bank-partial-february.csv"
+file = "Portuguese-bank-may-2026.csv"
 #handle_millenium(file)
-file = "Chase5869_Activity_20251231.csv"
-file = "Chase-partial-february.csv"
+
+#file = "Mil-April-partial-english.csv"
+#handle_millenium(file)
+
+file = "Chase-may-2026.csv"
 #handle_chase(file)
-file = "Schwab_751_Checking_31012026.csv"
+
+file = "Schwab-Checking_751.csv"
 #handle_schwab(file,"Sch-Checking-751")
+
+# the rosemary one has a different format, need to recode or just manually enter them
+#file = "Schwab_Rosemary_192_2026-mid-april.csv"
 #handle_schwab(file,"Sch-192-Rosemary")
-file = "ally_1051307708_2025.csv"
-#handle_ally(file,"ally-1051307708")
-file = "ally_sav-mc-combo-2025.csv"
-file = "ally-sav-mcnally-2024.csv"
-#handle_ally(file,"ally-2151307713-2190559050")
+
+#file = "ally_1051307708_2025.csv"
+file = "ally-check-may-2026.csv"
+handle_ally(file,"ally-1051307708") # ally checking
+
+#file = "ally-savings-7713.csv"
+#file = "ally-sav-mcnally-2024.csv"
+#handle_ally(file,"ally-2151307713-2190559050") #either savings
+
 # fix accounts 
 #easy_assign_accounts()
 file = "test_schwab_2022.csv"
 #handle_schwab_from_ynab(file,"Sch-Checking-751")
-handle_WellsFargo("Wells-Fargo.csv","converted_Wells_Fargo_PDFS_pass_2.csv")
+file = "Wells-Fargo-Checking-2026-04.csv"
+#handle_WellsFargo("Wells-Fargo.csv","converted_Wells_Fargo_PDFS_pass_2.csv")
+#handle_WellsFargo(file,None)
+
+file ="Amazon-2026-04.csv"
+#handle_amazon(file)

@@ -151,6 +151,8 @@ with ui.sidebar():
     ttypes = {"'D'":"Debit","'C'":"Credit","'T'":"Transfers","'P'":"Credit Card Payments","'I'":"Income"}
     ui.input_checkbox_group("types","Transaction Types",choices=ttypes,selected=(["'D'","'C'"]))
 #    ui.input_date_range("inDateRange", "Input date", start="2024-11-01", end="2025-11-30")
+    ui.input_selectize("input_x_category","Exclude Categories", choices = CATEGORIES,selected=["Mortgage","Home Insurance","21st avenue maintenance",
+        "2621 Expenses","2621 Income","Real Estate Tax"],multiple=True)
     ui.input_radio_buttons("months_or_years","Summarize by:",["Year","Month"],selected = ["Year"])
     ui.input_radio_buttons("sort_by","Sort by:",["amount","Date","category"],selected = ["amount"])
 
@@ -198,10 +200,6 @@ with ui.layout_columns(col_widths=[5,7,12]):
             totals = calc_filtered_sum()
             return f'{totals["count"]} filtered rows. Total Euros {totals["euros"]:,.2f} Total dollars {totals["usd"]:,.2f}'
 
-@transactions_df.set_patch_fn
-def _(*, patch: render.CellPatch):
-        update_data_with_patch(patch)
-        return patch["value"]    
 
 def update_data_with_patch():
     # we have to update trans, the source dataset, and the spreadsheet, we maybe could also update the data behind the grid as displayed
@@ -227,6 +225,8 @@ def update_data_with_patch():
     new_trans.loc[new_trans["PK"] == int(pk_),"memo"] = ed_memo
     new_trans.loc[new_trans["PK"] == int(pk_),"category"] = ed_cat
     new_trans.loc[new_trans["PK"] == int(pk_),"account"] = ed_acc
+    # should save filters here then apply them again, the following line will re-load all the datagrids :-(
+    save_filters = transactions_df.filter() 
     trans.set(new_trans) # trans is a reactive variable, called with trans.get() and trans.set() (use get_trans() to get the value not trans.get())
     credentials =  json.loads(os.environ["SERVICE_JSON"])
     gc = gspread.service_account_from_dict(credentials)
@@ -246,6 +246,8 @@ def update_data_with_patch():
             worksheet.update_cell(row_num, CAT_UPDATE,  ed_cat)
         if (orig_acc != ed_acc ):
             worksheet.update_cell(row_num, ACC_UPDATE,  ed_acc)
+#    if (save_filters and len(save_filters) > 0):
+#         await transactions_df.update_filter(save_filters) 
 
 @reactive.calc
 def calc_filtered_sum():
@@ -305,11 +307,27 @@ def buildFilter():
     qstr = None
     types = input.types()
     # ["D","C"] is default
+
     if types:
         llist = ",".join(types)
         qstr = f"newt in [ {llist} ]"
     else:
         qstr = "newt in ['D']"
+
+    years = input.input_year()
+    if "All Years" not in years:
+        qstr = f"{qstr} and year in {years}" 
+   
+    cats = input.input_category()
+    if (cats and len(cats) > 0):
+        qstr += f" and category in {cats}"
+    xcats = input.input_x_category()
+
+    if (xcats and len(xcats) > 0):
+        qstr += f" and category not in {xcats}"
+
+    print(f"Qstr is {qstr}")
+
     return qstr
 
 @reactive.calc
@@ -424,9 +442,6 @@ def on_row_selected():
     memo_ = data_selected["memo"].to_numpy()[0]
     amount_ = data_selected["amount"].to_numpy()[0]
     usd_ = data_selected["usd"].to_numpy()[0]
-    # Create a read-only input by adding the 'readonly' attribute
-    #pk_input = ui.input_text("pk", "Primary Key:", value="TXN-90210")
-    #pk_input.children[1].attrs.update({"readonly": "readonly"})
     acc_input = ui.input_text("edit_acc", "Account", value=str(acc_))
     acc_input.children[1].attrs.update({"readonly": "readonly"})
     pk_input = ui.input_text("edit_pk", "PK", value=str(pk_))
