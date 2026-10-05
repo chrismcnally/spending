@@ -5,4 +5,4 @@ google-auth
 google-auth-oauthlib
 google-auth-httplib2
 faicons
-matplotlib
+matplotlib==3.10.7
