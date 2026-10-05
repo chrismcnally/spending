@@ -225,14 +225,12 @@ def update_data_with_patch():
     new_trans.loc[new_trans["PK"] == int(pk_),"memo"] = ed_memo
     new_trans.loc[new_trans["PK"] == int(pk_),"category"] = ed_cat
     new_trans.loc[new_trans["PK"] == int(pk_),"account"] = ed_acc
-    # should save filters here then apply them again, the following line will re-load all the datagrids :-(
+    # should save filters here then apply them again, the subsequent line will re-load all the datagrids :-(
     save_filters = transactions_df.filter() 
-    trans.set(new_trans) # trans is a reactive variable, called with trans.get() and trans.set() (use get_trans() to get the value not trans.get())
+    trans.set(new_trans) # trans is a reactive variable, called with trans.get() and trans.set() (use get_trans() which will call trans.get())
     credentials =  json.loads(os.environ["SERVICE_JSON"])
     gc = gspread.service_account_from_dict(credentials)
     sh = gc.open_by_key(S_KEY)
-    # omg what a stupid assumption. Find the PK first, then get the row number, merde. 
-
     worksheet =  sh.get_worksheet(0)
     cell = worksheet.find(str(pk_),in_column=PK_COL)
     if (cell):
@@ -266,8 +264,8 @@ def calc_filtered_sum():
 
     return {
         "count": len(view),
-        "euros": view["amount"].sum(),
-        "usd" : view["usd"].sum()
+        "euros": pd.to_numeric(view["amount"],errors='coerce').sum(), 
+        "usd" :  pd.to_numeric(view["usd"],errors='coerce').sum()
     }
 # this is called 2x on startup no errors. when select 2026
 @reactive.calc
